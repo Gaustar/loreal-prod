@@ -45,6 +45,7 @@
         .resultat-highlight { font-size: 26px; font-weight: bold; margin: 5px 0; color: #2c3e50; }
         .error { color: #e74c3c; font-weight: bold; text-align: center; }
         .success { color: #27ae60; font-weight: bold; text-align: center; font-size: 22px; padding: 20px; }
+	.btn-avis { background: #9b59b6; margin-top: 20px; width: 100%; }
     </style>
 </head>
 <body>
@@ -335,9 +336,19 @@
             document.getElementById('resultat-' + ligne).innerHTML = '';
             const fill = document.getElementById('progress-fill-' + ligne);
             fill.style.width = '0%';
-            fill.innerText = '';  // ← Correction point 1
+            fill.innerText = '';
             document.getElementById('progress-text-' + ligne).innerText = 'Progression: 0%';
         }
+
+        function ouvrirAvis() {
+            window.open('https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog', '_blank');
+        }
     </script>
+
+    <div class="card" style="text-align: center;">
+        <button class="btn btn-avis" onclick="ouvrirAvis()">📝 Donner mon avis</button>
+        <p style="font-size: 12px; color: #999; margin-top: 10px;">Vos retours m'aident à améliorer l'outil</p>
+    </div>
+
 </body>
 </html>
