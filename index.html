@@ -10,49 +10,229 @@
     <title>L'Oréal - Suivi Production</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f5f5f5; min-height: 100vh; color: #333; }
-        .header { background: #000; color: white; padding: 20px; text-align: center; }
-        .tabs { display: flex; background: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-wrap: wrap; }
-        .tab { flex: 1; min-width: 100px; padding: 15px; text-align: center; font-weight: bold; border: none; background: #eee; cursor: pointer; color: #666; transition: 0.3s; }
-        .tab.active { background: white; color: #000; }
-        .tab.active.l60 { border-bottom: 4px solid #2ecc71; }
-        .tab.active.l70 { border-bottom: 4px solid #9b59b6; }
-        .tab.active.l74 { border-bottom: 4px solid #e67e22; }
-        .tab.active.l87 { border-bottom: 4px solid #3498db; }
-        .content { display: none; padding: 20px; animation: fadeIn 0.3s; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #f8f8f8;
+            min-height: 100vh;
+            color: #1a1a1a;
+            padding-bottom: 80px; /* espace pour le FAB et le footer */
+            position: relative;
+        }
+        /* HEADER */
+        .header {
+            background: #000000;
+            color: white;
+            padding: 24px 20px;
+            text-align: center;
+            border-bottom: 3px solid #C5A028; /* touche dorée */
+        }
+        .header h1 {
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        /* TABS */
+        .tabs {
+            display: flex;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            border-bottom: 1px solid #eee;
+        }
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px 5px;
+            text-align: center;
+            font-weight: 600;
+            border: none;
+            background: white;
+            cursor: pointer;
+            color: #666;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .tab.active {
+            color: #000;
+            border-bottom: 3px solid;
+        }
+        .tab.active.l60 { border-bottom-color: #C5A028; } /* or */
+        .tab.active.l70 { border-bottom-color: #C5A028; }
+        .tab.active.l74 { border-bottom-color: #C5A028; }
+        .tab.active.l87 { border-bottom-color: #C5A028; }
+        /* CONTENT */
+        .content {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.3s;
+        }
         .content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .ligne-header { border-radius: 15px; padding: 20px; color: white; text-align: center; margin-bottom: 15px; }
-        .ligne-header.l60 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-        .ligne-header.l70 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-        .ligne-header.l74 { background: linear-gradient(135deg, #e67e22, #d35400); }
-        .ligne-header.l87 { background: linear-gradient(135deg, #3498db, #2980b9); }
-        .card { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .progress-bar { width: 100%; height: 30px; background: #e0e0e0; border-radius: 15px; overflow: hidden; position: relative; margin-top: 10px; }
-        .progress-fill { height: 100%; background: #2ecc71; width: 0%; transition: width 0.5s ease-out; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 13px; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        .form-input { width: 100%; padding: 15px; font-size: 20px; border: 2px solid #ddd; border-radius: 10px; appearance: none; }
-        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .btn { padding: 18px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; transition: transform 0.1s; }
+        /* LIGNE HEADER (dégradés sobres) */
+        .ligne-header {
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #000; /* fallback */
+        }
+        .ligne-header.l60 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
+        .ligne-header.l70 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
+        .ligne-header.l74 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
+        .ligne-header.l87 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+        /* PROGRESS BAR */
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9e9e9;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #C5A028; /* or L'Oréal */
+            width: 0%;
+            transition: width 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        /* FORM */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            appearance: none;
+            transition: 0.2s;
+            background: white;
+        }
+        .form-input:focus {
+            border-color: #C5A028;
+            outline: none;
+        }
+        /* BUTTONS */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .btn {
+            padding: 16px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.1s, background 0.2s;
+            text-align: center;
+        }
         .btn:active { transform: scale(0.97); }
-        .btn-retirer { background: #e67e22; }
-        .btn-ajouter { background: #3498db; }
-        .btn-calculer { background: #2ecc71; grid-column: span 2; font-size: 18px; }
-        .btn-reset { background: #e74c3c; grid-column: span 2; margin-top: 5px; opacity: 0.9; }
-        .btn-avis { background: #9b59b6; margin-top: 20px; width: 100%; }
-        .resultat-section { margin-top: 15px; padding: 15px; background: #f9f9f9; border-left: 5px solid #3498db; border-radius: 8px; }
-        .resultat-title { font-weight: bold; color: #7f8c8d; font-size: 13px; text-transform: uppercase; }
-        .resultat-highlight { font-size: 26px; font-weight: bold; margin: 5px 0; color: #2c3e50; }
+        .btn-retirer { background: #e67e22; color: white; }
+        .btn-ajouter { background: #C5A028; color: white; }
+        .btn-calculer { background: #000000; color: white; grid-column: span 2; font-size: 18px; border-radius: 40px; }
+        .btn-reset { background: #aaa; color: white; grid-column: span 2; margin-top: 5px; background-color: #777; }
+        /* RESULT SECTIONS */
+        .resultat-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fafafa;
+            border-left: 5px solid #C5A028;
+            border-radius: 16px;
+        }
+        .resultat-title {
+            font-weight: bold;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .resultat-highlight {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 5px 0;
+            color: #1a1a1a;
+        }
         .error { color: #e74c3c; font-weight: bold; text-align: center; }
-        .success { color: #27ae60; font-weight: bold; text-align: center; font-size: 22px; padding: 20px; }
+        .success { color: #C5A028; font-weight: bold; text-align: center; font-size: 22px; padding: 20px; }
+        
+        /* FLOATING ACTION BUTTON (FAB) */
+        .fab-avis {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: #C5A028;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            border: none;
+            color: white;
+            font-size: 28px;
+        }
+        .fab-avis:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        /* footer discret */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #aaa;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+            background: white;
+        }
+        .footer span {
+            color: #C5A028;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>L'ORÉAL</h1>
-        <p>Suivi de Production</p>
+        <p>Suivi de Production - Excellence opérationnelle</p>
     </div>
 
     <div class="tabs">
@@ -62,8 +242,9 @@
         <button class="tab l87" onclick="switchTab('l87')">L87</button>
     </div>
 
+    <!-- Contenu L60 -->
     <div id="l60" class="content active">
-        <div class="ligne-header l60"><h2>Ligne Excellence</h2></div>
+        <div class="ligne-header l60"><h2>Ligne Excellence</h2><p style="font-size:14px">Cadence 85 p/min</p></div>
         <div class="card">
             <div id="progress-text-l60">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l60" class="progress-fill"></div></div>
@@ -87,8 +268,9 @@
         <div id="resultat-l60"></div>
     </div>
 
+    <!-- L70 -->
     <div id="l70" class="content">
-        <div class="ligne-header l70"><h2>Ligne L70</h2></div>
+        <div class="ligne-header l70"><h2>Ligne L70</h2><p style="font-size:14px">Cadence 150 p/min</p></div>
         <div class="card">
             <div id="progress-text-l70">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l70" class="progress-fill"></div></div>
@@ -112,8 +294,9 @@
         <div id="resultat-l70"></div>
     </div>
 
+    <!-- L74 -->
     <div id="l74" class="content">
-        <div class="ligne-header l74"><h2>Ligne L74</h2></div>
+        <div class="ligne-header l74"><h2>Ligne L74</h2><p style="font-size:14px">Cadence 130 p/min</p></div>
         <div class="card">
             <div id="progress-text-l74">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l74" class="progress-fill"></div></div>
@@ -137,8 +320,9 @@
         <div id="resultat-l74"></div>
     </div>
 
+    <!-- L87 -->
     <div id="l87" class="content">
-        <div class="ligne-header l87"><h2>Ligne L87</h2></div>
+        <div class="ligne-header l87"><h2>Ligne L87</h2><p style="font-size:14px">Cadence 75 p/min</p></div>
         <div class="card">
             <div id="progress-text-l87">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l87" class="progress-fill"></div></div>
@@ -162,9 +346,14 @@
         <div id="resultat-l87"></div>
     </div>
 
-    <div class="card" style="text-align: center;">
-        <button class="btn btn-avis" onclick="ouvrirAvis()">📝 Donner mon avis</button>
-        <p style="font-size: 12px; color: #999; margin-top: 10px;">Vos retours m'aident à améliorer l'outil</p>
+    <!-- Footer -->
+    <div class="footer">
+        Développé par <span>Gauthier</span> – Suivi atelier
+    </div>
+
+    <!-- FAB pour avis -->
+    <div class="fab-avis" onclick="ouvrirAvis()">
+        💬
     </div>
 
     <script>
@@ -196,185 +385,42 @@
             }
         };
 
-        // ========== FONCTIONS DE SAUVEGARDE localStorage ==========
-
+        // ========== localStorage ==========
         function sauvegarderValeur(ligne, champ, valeur) {
-            const cle = `${ligne}-${champ}`;
-            localStorage.setItem(cle, valeur);
+            localStorage.setItem(`${ligne}-${champ}`, valeur);
         }
-
-        function chargerValeur(ligne, champ, valeurParDefaut = '') {
-            const cle = `${ligne}-${champ}`;
-            const sauvegarde = localStorage.getItem(cle);
-            return sauvegarde !== null ? sauvegarde : valeurParDefaut;
+        function chargerValeur(ligne, champ, def = '') {
+            return localStorage.getItem(`${ligne}-${champ}`) ?? def;
         }
-
-        function sauvegarderToutesLesDonnees() {
-            const lignes = ['l60', 'l70', 'l74', 'l87'];
-            for (const ligne of lignes) {
-                const totalInput = document.getElementById(`total-${ligne}`);
-                const faitInput = document.getElementById(`fait-${ligne}`);
-                if (totalInput) sauvegarderValeur(ligne, 'total', totalInput.value);
-                if (faitInput) sauvegarderValeur(ligne, 'fait', faitInput.value);
-            }
-        }
-
-        function chargerToutesLesDonnees() {
-            const lignes = ['l60', 'l70', 'l74', 'l87'];
-            for (const ligne of lignes) {
-                const totalInput = document.getElementById(`total-${ligne}`);
-                const faitInput = document.getElementById(`fait-${ligne}`);
-                if (totalInput) totalInput.value = chargerValeur(ligne, 'total', '');
-                if (faitInput) faitInput.value = chargerValeur(ligne, 'fait', '0');
-            }
-        }
-
         function effacerSauvegardeLigne(ligne) {
             localStorage.removeItem(`${ligne}-total`);
             localStorage.removeItem(`${ligne}-fait`);
         }
+        function chargerToutesLesDonnees() {
+            ['l60','l70','l74','l87'].forEach(ligne => {
+                const totalInput = document.getElementById(`total-${ligne}`);
+                const faitInput = document.getElementById(`fait-${ligne}`);
+                if(totalInput) totalInput.value = chargerValeur(ligne, 'total', '');
+                if(faitInput) faitInput.value = chargerValeur(ligne, 'fait', '0');
+            });
+        }
 
-        // ========== FONCTIONS PRINCIPALES ==========
-
+        // ========== UI ==========
         function switchTab(ligne) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelector('.tab.' + ligne).classList.add('active');
+            document.querySelector(`.tab.${ligne}`).classList.add('active');
             document.getElementById(ligne).classList.add('active');
         }
 
         function modifierPalette(ligne, direction) {
             const input = document.getElementById('fait-' + ligne);
             let val = parseInt(input.value || 0);
-            if (isNaN(val)) val = 0;
+            if(isNaN(val)) val = 0;
             const modif = LIGNES[ligne].produitsParPalette * direction;
             input.value = Math.max(0, val + modif);
             sauvegarderValeur(ligne, 'fait', input.value);
             calculer(ligne);
-        }
-
-        function calculer(ligne) {
-            let total = parseInt(document.getElementById('total-' + ligne).value) || 0;
-            let fait = parseInt(document.getElementById('fait-' + ligne).value) || 0;
-            if (total < 0) total = 0;
-            if (fait < 0) fait = 0;
-
-            // Sauvegarde automatique à chaque calcul
-            sauvegarderValeur(ligne, 'total', total);
-            sauvegarderValeur(ligne, 'fait', fait);
-
-            if (ligne === 'l60') {
-                const reste = Math.max(0, total - fait);
-                const pourcent = total > 0 ? Math.min(100, (fait / total) * 100) : 0;
-                document.getElementById('progress-text-l60').innerText = `Progression: ${pourcent.toFixed(1)}%`;
-                const fill = document.getElementById('progress-fill-l60');
-                fill.style.width = pourcent + '%';
-                fill.innerText = pourcent > 15 ? fait.toLocaleString() : '';
-                const resDiv = document.getElementById('resultat-l60');
-                if (total <= 0) {
-                    resDiv.innerHTML = '<div class="card error">⚠️ Veuillez indiquer le total à produire</div>';
-                    return;
-                }
-                if (reste === 0) {
-                    resDiv.innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
-                    return;
-                }
-                const tubesLaminesParBoite = 252;
-                const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
-                const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
-                const tubesPlastiqueParBoite = 690;
-                const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
-                const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
-                const minTotales = reste / (LIGNES.l60.vitesse || 85);
-                const h = Math.floor(minTotales / 60);
-                const m = Math.floor(minTotales % 60);
-                const fin = new Date(Date.now() + minTotales * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-                let html = `
-                    <div class="card">
-                        <div class="resultat-section">
-                            <div class="resultat-title">Reste à produire</div>
-                            <div class="resultat-highlight">${reste.toLocaleString()} pièces</div>
-                        </div>
-                        <div class="resultat-section" style="border-left-color: #e67e22">
-                            <div class="resultat-title">Boîtes de tubes laminés (${tubesLaminesParBoite} tubes/boîte)</div>
-                            <div class="resultat-highlight" style="color:#e67e22">${nbBoitesLam} boîtes</div>
-                            <div class="resultat-text">Capacité la plus proche : <strong>${capaciteLam.toLocaleString()} tubes</strong></div>
-                        </div>
-                        <div class="resultat-section" style="border-left-color: #3498db">
-                            <div class="resultat-title">Boîtes de tubes plastique (${tubesPlastiqueParBoite} tubes/boîte)</div>
-                            <div class="resultat-highlight" style="color:#3498db">${nbBoitesPlast} boîtes</div>
-                            <div class="resultat-text">Capacité sécuritaire : <strong>${capacitePlast.toLocaleString()} tubes</strong> (un peu plus autorisé)</div>
-                        </div>
-                        <div class="resultat-section" style="border-left-color: #9b59b6">
-                            <div class="resultat-title">Temps restant estimé</div>
-                            <div class="resultat-highlight" style="color:#9b59b6">${h}h ${m}min</div>
-                            <div class="resultat-text">Fin de prod prévue à : <strong>${fin}</strong></div>
-                            <div class="resultat-text">Cadence : <strong>85 pièces/min</strong></div>
-                        </div>`;
-                if (LIGNES.l60.colorant) {
-                    const col = (reste / LIGNES.l60.produitsParPalette * LIGNES.l60.colorant).toFixed(1);
-                    html += `
-                        <div class="resultat-section" style="border-left-color: #f1c40f">
-                            <div class="resultat-title">Colorant nécessaire</div>
-                            <div class="resultat-highlight" style="color:#e67e22">${col} kg</div>
-                        </div>`;
-                }
-                html += `</div>`;
-                resDiv.innerHTML = html;
-                return;
-            }
-
-            const config = LIGNES[ligne];
-            const reste = Math.max(0, total - fait);
-            const pourcent = total > 0 ? Math.min(100, (fait / total * 100)) : 0;
-            document.getElementById('progress-text-' + ligne).innerText = `Progression: ${pourcent.toFixed(1)}%`;
-            const fill = document.getElementById('progress-fill-' + ligne);
-            fill.style.width = pourcent + '%';
-            fill.innerText = pourcent > 15 ? fait.toLocaleString() : '';
-            if (total <= 0) {
-                document.getElementById('resultat-' + ligne).innerHTML = '<div class="card error">⚠️ Veuillez indiquer le total à produire</div>';
-                return;
-            }
-            if (fait >= total) {
-                document.getElementById('resultat-' + ligne).innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
-                return;
-            }
-            const pal = Math.floor(reste / config.produitsParPalette);
-            const resteP = reste % config.produitsParPalette;
-            const niv = Math.floor(resteP / config.produitsParNiveau);
-            const boit = Math.ceil((resteP % config.produitsParNiveau) / config.produitsParBoite);
-            const minTotales = reste / config.vitesse;
-            const h = Math.floor(minTotales / 60);
-            const m = Math.floor(minTotales % 60);
-            const fin = new Date(Date.now() + minTotales * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            let html = `
-                <div class="card">
-                    <div class="resultat-section">
-                        <div class="resultat-title">Reste à produire</div>
-                        <div class="resultat-highlight">${reste.toLocaleString()} pces</div>
-                    </div>
-                    <div class="resultat-section" style="border-left-color: #f1c40f">
-                        <div class="resultat-title">Conditionnement</div>
-                        <div class="resultat-text">
-                            • <strong>${pal}</strong> palettes complètes<br>
-                            • <strong>${niv}</strong> niveaux + <strong>${boit}</strong> boîtes
-                        </div>
-                    </div>
-                    <div class="resultat-section" style="border-left-color: #9b59b6">
-                        <div class="resultat-title">Temps restant estimé</div>
-                        <div class="resultat-highlight" style="color:#9b59b6">${h}h ${m}min</div>
-                        <div class="resultat-text">Fin de prod prévue à : <strong>${fin}</strong></div>
-                    </div>`;
-            if (config.colorant) {
-                const col = (reste / config.produitsParPalette * config.colorant).toFixed(1);
-                html += `
-                    <div class="resultat-section" style="border-left-color: #e67e22">
-                        <div class="resultat-title">Colorant nécessaire</div>
-                        <div class="resultat-highlight" style="color:#e67e22">${col} kg</div>
-                    </div>`;
-            }
-            html += `</div>`;
-            document.getElementById('resultat-' + ligne).innerHTML = html;
         }
 
         function reinitialiser(ligne) {
@@ -382,11 +428,10 @@
             document.getElementById('fait-' + ligne).value = '0';
             document.getElementById('resultat-' + ligne).innerHTML = '';
             const fill = document.getElementById('progress-fill-' + ligne);
-            fill.style.width = '0%';
-            fill.innerText = '';
-            document.getElementById('progress-text-' + ligne).innerText = 'Progression: 0%';
-            
-            // Efface la sauvegarde pour cette ligne
+            if(fill) fill.style.width = '0%';
+            if(fill) fill.innerText = '';
+            const txt = document.getElementById('progress-text-' + ligne);
+            if(txt) txt.innerText = 'Progression: 0%';
             effacerSauvegardeLigne(ligne);
         }
 
@@ -394,35 +439,92 @@
             window.open('https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog', '_blank');
         }
 
-        // ========== INITIALISATION AU CHARGEMENT ==========
-        
-        // 1. Charger les données sauvegardées
-        chargerToutesLesDonnees();
+        // Calcul principal
+        function calculer(ligne) {
+            let total = parseInt(document.getElementById('total-' + ligne).value) || 0;
+            let fait = parseInt(document.getElementById('fait-' + ligne).value) || 0;
+            if(total < 0) total = 0;
+            if(fait < 0) fait = 0;
+            sauvegarderValeur(ligne, 'total', total);
+            sauvegarderValeur(ligne, 'fait', fait);
 
-        // 2. Ajouter des écouteurs d'événements pour sauvegarde automatique
-        const lignes = ['l60', 'l70', 'l74', 'l87'];
-        for (const ligne of lignes) {
-            const totalInput = document.getElementById(`total-${ligne}`);
-            const faitInput = document.getElementById(`fait-${ligne}`);
-            
-            if (totalInput) {
-                totalInput.addEventListener('input', function() {
-                    sauvegarderValeur(ligne, 'total', this.value);
-                    calculer(ligne);
-                });
+            // mise à jour progression
+            const pourcent = total > 0 ? Math.min(100, (fait/total)*100) : 0;
+            const progressText = document.getElementById(`progress-text-${ligne}`);
+            const fillDiv = document.getElementById(`progress-fill-${ligne}`);
+            if(progressText) progressText.innerText = `Progression: ${pourcent.toFixed(1)}%`;
+            if(fillDiv) {
+                fillDiv.style.width = pourcent + '%';
+                fillDiv.innerText = pourcent > 15 ? fait.toLocaleString() : '';
             }
-            if (faitInput) {
-                faitInput.addEventListener('input', function() {
-                    sauvegarderValeur(ligne, 'fait', this.value);
-                    calculer(ligne);
-                });
+
+            const resDiv = document.getElementById(`resultat-${ligne}`);
+            if(total <= 0) {
+                resDiv.innerHTML = '<div class="card error">⚠️ Veuillez indiquer le total à produire</div>';
+                return;
             }
+            const reste = Math.max(0, total - fait);
+            if(reste === 0) {
+                resDiv.innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
+                return;
+            }
+
+            // traitement spécifique L60 ou générique
+            if(ligne === 'l60') {
+                const tubesLaminesParBoite = 252;
+                const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
+                const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
+                const tubesPlastiqueParBoite = 690;
+                const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
+                const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
+                const minTotales = reste / LIGNES.l60.vitesse;
+                const h = Math.floor(minTotales/60);
+                const m = Math.floor(minTotales%60);
+                const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+                let html = `
+                    <div class="card">
+                        <div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pièces</div></div>
+                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>
+                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité sécuritaire : ${capacitePlast.toLocaleString()}</div></div>
+                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${h}h ${m}min</div><div>Fin estimée : ${fin}</div><div>Cadence 85 p/min</div></div>
+                        ${LIGNES.l60.colorant ? `<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">${((reste/LIGNES.l60.produitsParPalette)*LIGNES.l60.colorant).toFixed(1)} kg</div></div>` : ''}
+                    </div>`;
+                resDiv.innerHTML = html;
+                return;
+            }
+
+            // générique L70/L74/L87
+            const config = LIGNES[ligne];
+            const pal = Math.floor(reste / config.produitsParPalette);
+            const resteP = reste % config.produitsParPalette;
+            const niv = Math.floor(resteP / config.produitsParNiveau);
+            const boit = Math.ceil((resteP % config.produitsParNiveau) / config.produitsParBoite);
+            const minTot = reste / config.vitesse;
+            const hh = Math.floor(minTot/60);
+            const mm = Math.floor(minTot%60);
+            const finH = new Date(Date.now() + minTot*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+            let html = `
+                <div class="card">
+                    <div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pces</div></div>
+                    <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Conditionnement</div><div>• ${pal} palettes complètes<br>• ${niv} niveaux + ${boit} boîtes</div></div>
+                    <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${hh}h ${mm}min</div><div>Fin estimée : ${finH}</div></div>
+                    ${config.colorant ? `<div class="resultat-section"><div class="resultat-title">Colorant</div><div>${((reste/config.produitsParPalette)*config.colorant).toFixed(1)} kg</div></div>` : ''}
+                </div>`;
+            resDiv.innerHTML = html;
         }
 
-        // 3. Lancer le calcul initial pour chaque ligne (afficher les résultats)
-        for (const ligne of lignes) {
-            calculer(ligne);
+        // initialisation
+        function init() {
+            chargerToutesLesDonnees();
+            ['l60','l70','l74','l87'].forEach(ligne => {
+                const totalInp = document.getElementById(`total-${ligne}`);
+                const faitInp = document.getElementById(`fait-${ligne}`);
+                if(totalInp) totalInp.addEventListener('input', () => { sauvegarderValeur(ligne, 'total', totalInp.value); calculer(ligne); });
+                if(faitInp) faitInp.addEventListener('input', () => { sauvegarderValeur(ligne, 'fait', faitInp.value); calculer(ligne); });
+                calculer(ligne);
+            });
         }
+        init();
     </script>
 </body>
 </html>
