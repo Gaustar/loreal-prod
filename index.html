@@ -15,27 +15,18 @@
             background: #f8f8f8;
             min-height: 100vh;
             color: #1a1a1a;
-            padding-bottom: 80px; /* espace pour le FAB et le footer */
+            padding-bottom: 80px;
             position: relative;
         }
-        /* HEADER */
         .header {
             background: #000000;
             color: white;
             padding: 24px 20px;
             text-align: center;
-            border-bottom: 3px solid #C5A028; /* touche dorée */
+            border-bottom: 3px solid #C5A028;
         }
-        .header h1 {
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        .header p {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-top: 5px;
-        }
-        /* TABS */
+        .header h1 { font-weight: 600; letter-spacing: 1px; }
+        .header p { font-size: 14px; opacity: 0.8; margin-top: 5px; }
         .tabs {
             display: flex;
             background: white;
@@ -59,36 +50,19 @@
             transition: 0.2s;
             font-size: 14px;
         }
-        .tab.active {
-            color: #000;
-            border-bottom: 3px solid;
-        }
-        .tab.active.l60 { border-bottom-color: #C5A028; } /* or */
-        .tab.active.l70 { border-bottom-color: #C5A028; }
-        .tab.active.l74 { border-bottom-color: #C5A028; }
-        .tab.active.l87 { border-bottom-color: #C5A028; }
-        /* CONTENT */
-        .content {
-            display: none;
-            padding: 20px;
-            animation: fadeIn 0.3s;
-        }
+        .tab.active { color: #000; border-bottom: 3px solid #C5A028; }
+        .content { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* LIGNE HEADER (dégradés sobres) */
         .ligne-header {
             border-radius: 20px;
             padding: 20px;
             color: white;
             text-align: center;
             margin-bottom: 20px;
-            background: #000; /* fallback */
+            background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+            border-left: 5px solid #C5A028;
         }
-        .ligne-header.l60 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
-        .ligne-header.l70 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
-        .ligne-header.l74 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
-        .ligne-header.l87 { background: linear-gradient(135deg, #1e1e1e, #2c2c2c); border-left: 5px solid #C5A028; }
-        /* CARDS */
         .card {
             background: white;
             border-radius: 20px;
@@ -97,19 +71,17 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border: 1px solid #f0f0f0;
         }
-        /* PROGRESS BAR */
         .progress-bar {
             width: 100%;
             height: 30px;
             background: #e9e9e9;
             border-radius: 20px;
             overflow: hidden;
-            position: relative;
             margin-top: 10px;
         }
         .progress-fill {
             height: 100%;
-            background: #C5A028; /* or L'Oréal */
+            background: #C5A028;
             width: 0%;
             transition: width 0.5s ease-out;
             display: flex;
@@ -119,15 +91,8 @@
             font-weight: bold;
             font-size: 13px;
         }
-        /* FORM */
         .form-group { margin-bottom: 18px; }
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #333;
-        }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #333; }
         .form-input {
             width: 100%;
             padding: 15px;
@@ -135,14 +100,9 @@
             border: 2px solid #e0e0e0;
             border-radius: 16px;
             appearance: none;
-            transition: 0.2s;
             background: white;
         }
-        .form-input:focus {
-            border-color: #C5A028;
-            outline: none;
-        }
-        /* BUTTONS */
+        .form-input:focus { border-color: #C5A028; outline: none; }
         .button-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -156,15 +116,14 @@
             font-weight: 700;
             cursor: pointer;
             font-size: 16px;
-            transition: transform 0.1s, background 0.2s;
+            transition: transform 0.1s;
             text-align: center;
         }
         .btn:active { transform: scale(0.97); }
         .btn-retirer { background: #e67e22; color: white; }
         .btn-ajouter { background: #C5A028; color: white; }
         .btn-calculer { background: #000000; color: white; grid-column: span 2; font-size: 18px; border-radius: 40px; }
-        .btn-reset { background: #aaa; color: white; grid-column: span 2; margin-top: 5px; background-color: #777; }
-        /* RESULT SECTIONS */
+        .btn-reset { background: #777; color: white; grid-column: span 2; margin-top: 5px; }
         .resultat-section {
             margin-top: 15px;
             padding: 15px;
@@ -172,23 +131,10 @@
             border-left: 5px solid #C5A028;
             border-radius: 16px;
         }
-        .resultat-title {
-            font-weight: bold;
-            color: #555;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .resultat-highlight {
-            font-size: 26px;
-            font-weight: bold;
-            margin: 5px 0;
-            color: #1a1a1a;
-        }
+        .resultat-title { font-weight: bold; color: #555; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .resultat-highlight { font-size: 26px; font-weight: bold; margin: 5px 0; color: #1a1a1a; }
         .error { color: #e74c3c; font-weight: bold; text-align: center; }
         .success { color: #C5A028; font-weight: bold; text-align: center; font-size: 22px; padding: 20px; }
-        
-        /* FLOATING ACTION BUTTON (FAB) */
         .fab-avis {
             position: fixed;
             bottom: 25px;
@@ -204,15 +150,10 @@
             cursor: pointer;
             transition: all 0.2s ease;
             z-index: 1000;
-            border: none;
             color: white;
             font-size: 28px;
         }
-        .fab-avis:active {
-            transform: scale(0.92);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        /* footer discret */
+        .fab-avis:active { transform: scale(0.92); }
         .footer {
             text-align: center;
             padding: 20px;
@@ -222,9 +163,29 @@
             margin-top: 20px;
             background: white;
         }
-        .footer span {
+        .footer span { color: #C5A028; font-weight: 500; }
+        /* Style pour les boutons de sélection poste */
+        .poste-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .poste-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #C5A028;
+            background: white;
+            border-radius: 40px;
+            font-weight: bold;
             color: #C5A028;
-            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+        .poste-btn.active {
+            background: #C5A028;
+            color: white;
         }
     </style>
 </head>
@@ -232,24 +193,29 @@
 
     <div class="header">
         <h1>L'ORÉAL</h1>
-        <p>Suivi de Production - Excellence opérationnelle</p>
+        <p>Suivi de Production</p>
     </div>
 
     <div class="tabs">
-        <button class="tab l60 active" onclick="switchTab('l60')">L60-61-65</button>
+        <button class="tab l60 active" onclick="switchTab('l60')">Excellence</button>
         <button class="tab l70" onclick="switchTab('l70')">L70</button>
         <button class="tab l74" onclick="switchTab('l74')">L74</button>
         <button class="tab l87" onclick="switchTab('l87')">L87</button>
     </div>
 
-    <!-- Contenu L60 -->
+    <!-- Contenu Excellence (L60) -->
     <div id="l60" class="content active">
-        <div class="ligne-header l60"><h2>Ligne Excellence</h2><p style="font-size:14px">Cadence 85 p/min</p></div>
+        <div class="ligne-header"><h2>Lignes Excellence</h2></div>
         <div class="card">
             <div id="progress-text-l60">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l60" class="progress-fill"></div></div>
         </div>
         <div class="card">
+            <!-- Sélecteur Avant / Arrière -->
+            <div class="poste-selector" id="poste-selector-l60">
+                <div class="poste-btn" data-poste="arriere">🔧 Arrière (Remplissage)</div>
+                <div class="poste-btn" data-poste="avant">📦 Avant (Qualité)</div>
+            </div>
             <div class="form-group">
                 <label class="form-label">Quantité totale à produire :</label>
                 <input type="number" id="total-l60" class="form-input" placeholder="0" min="1" step="1">
@@ -270,7 +236,7 @@
 
     <!-- L70 -->
     <div id="l70" class="content">
-        <div class="ligne-header l70"><h2>Ligne L70</h2><p style="font-size:14px">Cadence 150 p/min</p></div>
+        <div class="ligne-header"><h2>Ligne L70</h2></div>
         <div class="card">
             <div id="progress-text-l70">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l70" class="progress-fill"></div></div>
@@ -296,7 +262,7 @@
 
     <!-- L74 -->
     <div id="l74" class="content">
-        <div class="ligne-header l74"><h2>Ligne L74</h2><p style="font-size:14px">Cadence 130 p/min</p></div>
+        <div class="ligne-header"><h2>Ligne L74</h2></div>
         <div class="card">
             <div id="progress-text-l74">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l74" class="progress-fill"></div></div>
@@ -322,7 +288,7 @@
 
     <!-- L87 -->
     <div id="l87" class="content">
-        <div class="ligne-header l87"><h2>Ligne L87</h2><p style="font-size:14px">Cadence 75 p/min</p></div>
+        <div class="ligne-header"><h2>Ligne L87</h2></div>
         <div class="card">
             <div id="progress-text-l87">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l87" class="progress-fill"></div></div>
@@ -346,12 +312,10 @@
         <div id="resultat-l87"></div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
-        Développé par <span>Gauthier</span> – Suivi atelier
+        <span>L'ORÉAL GROUPE</span> – Suivi atelier
     </div>
 
-    <!-- FAB pour avis -->
     <div class="fab-avis" onclick="ouvrirAvis()">
         💬
     </div>
@@ -385,7 +349,56 @@
             }
         };
 
-        // ========== localStorage ==========
+        // ========== GESTION POSTE POUR L60 ==========
+        let posteActuel = "arriere"; // 'arriere' ou 'avant'
+
+        function initialiserPoste() {
+            const saved = localStorage.getItem('l60-poste');
+            if (saved === 'avant' || saved === 'arriere') {
+                posteActuel = saved;
+            } else {
+                posteActuel = 'arriere';
+            }
+            // Mettre à jour l'interface des boutons
+            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
+                const btnPoste = btn.getAttribute('data-poste');
+                if (btnPoste === posteActuel) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        function changerPoste(poste) {
+            if (poste !== 'avant' && poste !== 'arriere') return;
+            posteActuel = poste;
+            localStorage.setItem('l60-poste', poste);
+            // Mettre à jour l'aspect des boutons
+            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
+                const btnPoste = btn.getAttribute('data-poste');
+                if (btnPoste === poste) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            // Recalculer l'affichage
+            calculer('l60');
+        }
+
+        // Attacher les événements après chargement du DOM
+        function attacherEvenementsPoste() {
+            const btns = document.querySelectorAll('#poste-selector-l60 .poste-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const poste = btn.getAttribute('data-poste');
+                    changerPoste(poste);
+                });
+            });
+        }
+
+        // ========== FONCTIONS STOCKAGE LOCAL ==========
         function sauvegarderValeur(ligne, champ, valeur) {
             localStorage.setItem(`${ligne}-${champ}`, valeur);
         }
@@ -405,7 +418,7 @@
             });
         }
 
-        // ========== UI ==========
+        // ========== FONCTIONS PRINCIPALES ==========
         function switchTab(ligne) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
@@ -433,13 +446,18 @@
             const txt = document.getElementById('progress-text-' + ligne);
             if(txt) txt.innerText = 'Progression: 0%';
             effacerSauvegardeLigne(ligne);
+            if (ligne === 'l60') {
+                // Remettre le poste par défaut ?
+                // On ne réinitialise pas le poste, on garde celui en cours
+                // mais on peut forcer l'affichage
+                calculer('l60');
+            }
         }
 
         function ouvrirAvis() {
             window.open('https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog', '_blank');
         }
 
-        // Calcul principal
         function calculer(ligne) {
             let total = parseInt(document.getElementById('total-' + ligne).value) || 0;
             let fait = parseInt(document.getElementById('fait-' + ligne).value) || 0;
@@ -448,7 +466,6 @@
             sauvegarderValeur(ligne, 'total', total);
             sauvegarderValeur(ligne, 'fait', fait);
 
-            // mise à jour progression
             const pourcent = total > 0 ? Math.min(100, (fait/total)*100) : 0;
             const progressText = document.getElementById(`progress-text-${ligne}`);
             const fillDiv = document.getElementById(`progress-fill-${ligne}`);
@@ -469,31 +486,49 @@
                 return;
             }
 
-            // traitement spécifique L60 ou générique
-            if(ligne === 'l60') {
-                const tubesLaminesParBoite = 252;
-                const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
-                const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
-                const tubesPlastiqueParBoite = 690;
-                const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
-                const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
-                const minTotales = reste / LIGNES.l60.vitesse;
+            // Cas particulier L60 avec choix du poste
+            if (ligne === 'l60') {
+                const config = LIGNES.l60;
+                const minTotales = reste / config.vitesse;
                 const h = Math.floor(minTotales/60);
                 const m = Math.floor(minTotales%60);
                 const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-                let html = `
-                    <div class="card">
-                        <div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pièces</div></div>
-                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>
-                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité sécuritaire : ${capacitePlast.toLocaleString()}</div></div>
-                        <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${h}h ${m}min</div><div>Fin estimée : ${fin}</div><div>Cadence 85 p/min</div></div>
-                        ${LIGNES.l60.colorant ? `<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">${((reste/LIGNES.l60.produitsParPalette)*LIGNES.l60.colorant).toFixed(1)} kg</div></div>` : ''}
-                    </div>`;
+                const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
+
+                let html = `<div class="card">`;
+                html += `<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pièces</div></div>`;
+
+                if (posteActuel === 'arriere') {
+                    // Tubes laminés (arrondi au plus proche)
+                    const tubesLaminesParBoite = 252;
+                    const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
+                    const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
+                    // Tubes plastique (arrondi supérieur)
+                    const tubesPlastiqueParBoite = 690;
+                    const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
+                    const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
+
+                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
+                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité sécuritaire : ${capacitePlast.toLocaleString()}</div></div>`;
+                } else { // avant
+                    const noticesParPaquet = 1200;
+                    const nbPaquetsNotices = Math.ceil(reste / noticesParPaquet);
+                    const etuisParBoite = 230;
+                    const nbBoitesEtuis = Math.ceil(reste / etuisParBoite);
+
+                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div></div>`;
+                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight">${nbBoitesEtuis} boîtes</div></div>`;
+                }
+
+                // Temps restant et colorant (commun aux deux postes)
+                html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${h}h ${m}min</div><div>Fin estimée : ${fin}</div></div>`;
+                html += `<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">${colorant} kg</div></div>`;
+                html += `</div>`;
                 resDiv.innerHTML = html;
                 return;
             }
 
-            // générique L70/L74/L87
+            // Calcul générique pour L70, L74, L87
             const config = LIGNES[ligne];
             const pal = Math.floor(reste / config.produitsParPalette);
             const resteP = reste % config.produitsParPalette;
@@ -513,9 +548,11 @@
             resDiv.innerHTML = html;
         }
 
-        // initialisation
+        // ========== INITIALISATION ==========
         function init() {
             chargerToutesLesDonnees();
+            initialiserPoste();
+            attacherEvenementsPoste();
             ['l60','l70','l74','l87'].forEach(ligne => {
                 const totalInp = document.getElementById(`total-${ligne}`);
                 const faitInp = document.getElementById(`fait-${ligne}`);
