@@ -164,7 +164,6 @@
             background: white;
         }
         .footer span { color: #C5A028; font-weight: 500; }
-        /* Style pour les boutons de sélection poste */
         .poste-selector {
             display: flex;
             gap: 15px;
@@ -186,6 +185,12 @@
         .poste-btn.active {
             background: #C5A028;
             color: white;
+        }
+        .developer-credit {
+            font-size: 10px;
+            color: #bbb;
+            margin-top: 8px;
+            text-align: center;
         }
     </style>
 </head>
@@ -211,7 +216,6 @@
             <div class="progress-bar"><div id="progress-fill-l60" class="progress-fill"></div></div>
         </div>
         <div class="card">
-            <!-- Sélecteur Avant / Arrière -->
             <div class="poste-selector" id="poste-selector-l60">
                 <div class="poste-btn" data-poste="arriere">🔧 Arrière (Remplissage)</div>
                 <div class="poste-btn" data-poste="avant">📦 Avant (Qualité)</div>
@@ -314,6 +318,7 @@
 
     <div class="footer">
         <span>L'ORÉAL GROUPE</span> – Suivi atelier
+        <div class="developer-credit">Développé par Gauthier</div>
     </div>
 
     <div class="fab-avis" onclick="ouvrirAvis()">
@@ -350,7 +355,7 @@
         };
 
         // ========== GESTION POSTE POUR L60 ==========
-        let posteActuel = "arriere"; // 'arriere' ou 'avant'
+        let posteActuel = "arriere";
 
         function initialiserPoste() {
             const saved = localStorage.getItem('l60-poste');
@@ -359,7 +364,6 @@
             } else {
                 posteActuel = 'arriere';
             }
-            // Mettre à jour l'interface des boutons
             document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
                 const btnPoste = btn.getAttribute('data-poste');
                 if (btnPoste === posteActuel) {
@@ -374,7 +378,6 @@
             if (poste !== 'avant' && poste !== 'arriere') return;
             posteActuel = poste;
             localStorage.setItem('l60-poste', poste);
-            // Mettre à jour l'aspect des boutons
             document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
                 const btnPoste = btn.getAttribute('data-poste');
                 if (btnPoste === poste) {
@@ -383,11 +386,9 @@
                     btn.classList.remove('active');
                 }
             });
-            // Recalculer l'affichage
             calculer('l60');
         }
 
-        // Attacher les événements après chargement du DOM
         function attacherEvenementsPoste() {
             const btns = document.querySelectorAll('#poste-selector-l60 .poste-btn');
             btns.forEach(btn => {
@@ -415,6 +416,23 @@
                 const faitInput = document.getElementById(`fait-${ligne}`);
                 if(totalInput) totalInput.value = chargerValeur(ligne, 'total', '');
                 if(faitInput) faitInput.value = chargerValeur(ligne, 'fait', '0');
+            });
+        }
+
+        // ========== FONCTION POUR EFFACER LE 0 AU FOCUS ==========
+        function initialiserChampsSansZero() {
+            const tousLesChampsFait = document.querySelectorAll('input[id^="fait-"]');
+            tousLesChampsFait.forEach(champ => {
+                champ.addEventListener('focus', function() {
+                    if (this.value === '0') {
+                        this.value = '';
+                    }
+                });
+                champ.addEventListener('blur', function() {
+                    if (this.value === '' || this.value === null) {
+                        this.value = '0';
+                    }
+                });
             });
         }
 
@@ -447,9 +465,6 @@
             if(txt) txt.innerText = 'Progression: 0%';
             effacerSauvegardeLigne(ligne);
             if (ligne === 'l60') {
-                // Remettre le poste par défaut ?
-                // On ne réinitialise pas le poste, on garde celui en cours
-                // mais on peut forcer l'affichage
                 calculer('l60');
             }
         }
@@ -486,7 +501,6 @@
                 return;
             }
 
-            // Cas particulier L60 avec choix du poste
             if (ligne === 'l60') {
                 const config = LIGNES.l60;
                 const minTotales = reste / config.vitesse;
@@ -499,28 +513,25 @@
                 html += `<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pièces</div></div>`;
 
                 if (posteActuel === 'arriere') {
-                    // Tubes laminés (arrondi au plus proche)
                     const tubesLaminesParBoite = 252;
                     const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
                     const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
-                    // Tubes plastique (arrondi supérieur)
                     const tubesPlastiqueParBoite = 690;
                     const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
                     const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
 
                     html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
                     html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité sécuritaire : ${capacitePlast.toLocaleString()}</div></div>`;
-                } else { // avant
+                } else {
                     const noticesParPaquet = 1200;
                     const nbPaquetsNotices = Math.ceil(reste / noticesParPaquet);
                     const etuisParBoite = 230;
                     const nbBoitesEtuis = Math.ceil(reste / etuisParBoite);
 
-                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div></div>`;
+                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div></div>`;
                     html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight">${nbBoitesEtuis} boîtes</div></div>`;
                 }
 
-                // Temps restant et colorant (commun aux deux postes)
                 html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${h}h ${m}min</div><div>Fin estimée : ${fin}</div></div>`;
                 html += `<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">${colorant} kg</div></div>`;
                 html += `</div>`;
@@ -528,7 +539,6 @@
                 return;
             }
 
-            // Calcul générique pour L70, L74, L87
             const config = LIGNES[ligne];
             const pal = Math.floor(reste / config.produitsParPalette);
             const resteP = reste % config.produitsParPalette;
@@ -553,6 +563,8 @@
             chargerToutesLesDonnees();
             initialiserPoste();
             attacherEvenementsPoste();
+            initialiserChampsSansZero();
+            
             ['l60','l70','l74','l87'].forEach(ligne => {
                 const totalInp = document.getElementById(`total-${ligne}`);
                 const faitInp = document.getElementById(`fait-${ligne}`);
