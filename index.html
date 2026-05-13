@@ -419,22 +419,23 @@
             });
         }
 
-        // ========== FONCTION POUR EFFACER LE 0 AU FOCUS ==========
-        function initialiserChampsSansZero() {
-            const tousLesChampsFait = document.querySelectorAll('input[id^="fait-"]');
-            tousLesChampsFait.forEach(champ => {
-                champ.addEventListener('focus', function() {
-                    if (this.value === '0') {
-                        this.value = '';
-                    }
-                });
-                champ.addEventListener('blur', function() {
-                    if (this.value === '' || this.value === null) {
-                        this.value = '0';
-                    }
-                });
-            });
-        }
+// ========== FONCTION POUR EFFACER LE 0 AU FOCUS ==========
+function initialiserChampsSansZero() {
+    // Cible tous les champs "total" ET "fait"
+    const tousLesChamps = document.querySelectorAll('input[id^="total-"], input[id^="fait-"]');
+    tousLesChamps.forEach(champ => {
+        champ.addEventListener('focus', function() {
+            if (this.value === '0') {
+                this.value = '';
+            }
+        });
+        champ.addEventListener('blur', function() {
+            if (this.value === '' || this.value === null) {
+                this.value = '0';
+            }
+        });
+    });
+}
 
         // ========== FONCTIONS PRINCIPALES ==========
         function switchTab(ligne) {
