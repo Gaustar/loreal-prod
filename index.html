@@ -63,6 +63,12 @@
             background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
             border-left: 5px solid #C5A028;
         }
+        .ligne-header h2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
         .card {
             background: white;
             border-radius: 20px;
@@ -157,13 +163,12 @@
         .footer {
             text-align: center;
             padding: 20px;
-            font-size: 12px;
+            font-size: 13px;
             color: #aaa;
             border-top: 1px solid #eee;
             margin-top: 20px;
             background: white;
         }
-        .footer span { color: #C5A028; font-weight: 500; }
         .poste-selector {
             display: flex;
             gap: 15px;
@@ -186,18 +191,235 @@
             background: #C5A028;
             color: white;
         }
-        .developer-credit {
-            font-size: 10px;
-            color: #bbb;
-            margin-top: 8px;
+
+        /* ========== ICONE ECROU & MODAL CADENCE ========== */
+        .icon-ecrou {
+            font-size: 22px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+        .icon-ecrou:active {
+            transform: scale(0.8) rotate(45deg);
+            opacity: 1;
+        }
+
+        /* ========== TIMER DE SHIFT ========== */
+        .icon-timer {
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: all 0.2s;
+            display: inline-block;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+        .icon-timer:active { transform: scale(0.8); opacity: 1; }
+
+        /* ========== MODAL COMMUN ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            animation: fadeIn 0.2s;
+        }
+        .modal-box h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #C5A028;
+            padding-bottom: 10px;
+        }
+        .modal-reset-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 12px;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 12px;
+            display: block;
+            width: 100%;
             text-align: center;
         }
+
+        /* ========== MODAL SHIFT (STYLE DARK) ========== */
+        .shift-modal-box {
+            background: #1a1a1a;
+            color: white;
+            border-radius: 24px;
+            padding: 30px 25px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            text-align: center;
+            animation: fadeIn 0.2s;
+        }
+        .shift-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .shift-selector button {
+            flex: 1;
+            padding: 10px;
+            background: #2a2a2a;
+            border: 2px solid #333;
+            color: #888;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .shift-selector button.active {
+            background: #C5A028;
+            border-color: #C5A028;
+            color: #000;
+        }
+        .shift-label {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #C5A028;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .shift-countdown {
+            font-size: 44px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+        .shift-progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0 8px;
+        }
+        .shift-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #C5A028, #e6c65a);
+            width: 0%;
+            transition: width 1s linear;
+            border-radius: 10px;
+        }
+        .shift-meta {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* ===== Timer Repas ===== */
+        .repas-section {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid #333;
+        }
+        .repas-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .repas-toggle input { display: none; }
+        .repas-switch {
+            width: 40px;
+            height: 22px;
+            background: #333;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .repas-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 16px; height: 16px;
+            background: #888;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .repas-toggle input:checked + .repas-switch {
+            background: #C5A028;
+        }
+        .repas-toggle input:checked + .repas-switch::after {
+            left: 21px;
+            background: #000;
+        }
+        .repas-config {
+            display: none;
+            margin-top: 10px;
+            animation: fadeIn 0.3s;
+        }
+        .repas-config.visible { display: block; }
+        .repas-time-input {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #C5A028;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            color-scheme: dark;
+        }
+        .repas-countdown {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+            margin-top: 8px;
+        }
+        .repas-countdown.passe { color: #2ecc71; }
+        .repas-label-small {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .shift-close-btn {
+            margin-top: 25px;
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .shift-close-btn:active { background: #444; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>L'ORÉAL</h1>
+        <h1>L'ORÉAL <span class="icon-timer" onclick="ouvrirTimerShift()">⏱️</span></h1>
         <p>Suivi de Production</p>
     </div>
 
@@ -210,7 +432,9 @@
 
     <!-- Contenu Excellence (L60) -->
     <div id="l60" class="content active">
-        <div class="ligne-header"><h2>Lignes Excellence</h2></div>
+        <div class="ligne-header">
+            <h2>Lignes Excellence <span class="icon-ecrou" onclick="ouvrirReglageCadence('l60')">🔩</span></h2>
+        </div>
         <div class="card">
             <div id="progress-text-l60">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l60" class="progress-fill"></div></div>
@@ -240,7 +464,9 @@
 
     <!-- L70 -->
     <div id="l70" class="content">
-        <div class="ligne-header"><h2>Ligne L70</h2></div>
+        <div class="ligne-header">
+            <h2>Ligne L70 <span class="icon-ecrou" onclick="ouvrirReglageCadence('l70')">🔩</span></h2>
+        </div>
         <div class="card">
             <div id="progress-text-l70">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l70" class="progress-fill"></div></div>
@@ -266,7 +492,9 @@
 
     <!-- L74 -->
     <div id="l74" class="content">
-        <div class="ligne-header"><h2>Ligne L74</h2></div>
+        <div class="ligne-header">
+            <h2>Ligne L74 <span class="icon-ecrou" onclick="ouvrirReglageCadence('l74')">🔩</span></h2>
+        </div>
         <div class="card">
             <div id="progress-text-l74">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l74" class="progress-fill"></div></div>
@@ -292,7 +520,9 @@
 
     <!-- L87 -->
     <div id="l87" class="content">
-        <div class="ligne-header"><h2>Ligne L87</h2></div>
+        <div class="ligne-header">
+            <h2>Ligne L87 <span class="icon-ecrou" onclick="ouvrirReglageCadence('l87')">🔩</span></h2>
+        </div>
         <div class="card">
             <div id="progress-text-l87">Progression: 0%</div>
             <div class="progress-bar"><div id="progress-fill-l87" class="progress-fill"></div></div>
@@ -317,12 +547,60 @@
     </div>
 
     <div class="footer">
-        <span>L'ORÉAL GROUPE</span> – Suivi atelier
-        <div class="developer-credit">Développé par Gauthier</div>
+        Outil fait maison pour l'équipe 🛠️<br>
+        <span style="font-size: 11px; color: #ccc;">Bon courage pour le shift ! 💪</span>
     </div>
 
     <div class="fab-avis" onclick="ouvrirAvis()">
         💬
+    </div>
+
+    <!-- Modal Réglage Cadence -->
+    <div class="modal-overlay" id="modal-cadence">
+        <div class="modal-box">
+            <h3 id="modal-cadence-title">🔩 Cadence</h3>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label class="form-label">Pièces par minute :</label>
+                <input type="number" id="input-cadence" class="form-input" style="font-size: 24px; text-align: center;" min="1">
+            </div>
+            <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+                <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageCadence()">Annuler</button>
+                <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverCadence()">Valider</button>
+            </div>
+            <button class="modal-reset-btn" onclick="resetCadence()">Rétablir la valeur par défaut</button>
+        </div>
+    </div>
+
+    <!-- Modal Timer de Shift -->
+    <div class="modal-overlay" id="modal-shift">
+        <div class="shift-modal-box">
+            <div class="shift-selector">
+                <button id="btn-shift-matin" onclick="choisirShift('matin')">☀️ Matin</button>
+                <button id="btn-shift-aprem" onclick="choisirShift('aprem')">🌤️ Après-m</button>
+            </div>
+
+            <div class="shift-label" id="shift-label">CHARGEMENT...</div>
+            <div class="shift-countdown" id="shift-countdown">--:--:--</div>
+            <div class="shift-progress-bar"><div class="shift-progress-fill" id="shift-progress-fill"></div></div>
+            <div class="shift-meta" id="shift-progress-text">0% du shift effectué</div>
+            <div class="shift-meta" id="shift-end-time" style="margin-top: 10px; color: #C5A028; font-weight: bold;">Fin à --h--</div>
+
+            <!-- Timer Repas -->
+            <div class="repas-section">
+                <label class="repas-toggle">
+                    <span>🍴 Timer repas</span>
+                    <input type="checkbox" id="repas-actif" onchange="toggleRepas()">
+                    <div class="repas-switch"></div>
+                </label>
+                <div class="repas-config" id="repas-config">
+                    <input type="time" id="repas-heure" class="repas-time-input" onchange="sauverHeureRepas()">
+                    <div class="repas-countdown" id="repas-countdown">--:--:--</div>
+                    <div class="repas-label-small" id="repas-label">avant la pause</div>
+                </div>
+            </div>
+
+            <button class="shift-close-btn" onclick="fermerTimerShift()">Fermer</button>
+        </div>
     </div>
 
     <script>
@@ -354,17 +632,86 @@
             }
         };
 
+        const CADENCES_DEFAUT = { l60: 85, l70: 150, l74: 130, l87: 75 };
+
+        // ========== STOCKAGE LOCAL SÉCURISÉ ==========
+        function storageSet(key, value) {
+            try { localStorage.setItem(key, value); } catch(e) {}
+        }
+        function storageGet(key, def) {
+            try {
+                const val = localStorage.getItem(key);
+                return val !== null ? val : def;
+            } catch(e) { return def; }
+        }
+        function storageRemove(key) {
+            try { localStorage.removeItem(key); } catch(e) {}
+        }
+
+        // ========== REGLAGE CADENCE PAR LIGNE ==========
+        let ligneEnCoursReglage = null;
+
+        function chargerCadences() {
+            ['l60','l70','l74','l87'].forEach(function(ligne) {
+                const saved = storageGet('cadence-' + ligne, null);
+                if (saved && !isNaN(parseInt(saved))) {
+                    LIGNES[ligne].vitesse = parseInt(saved);
+                }
+            });
+        }
+
+        function ouvrirReglageCadence(ligne) {
+            if (navigator.vibrate) navigator.vibrate(30);
+            ligneEnCoursReglage = ligne;
+            const nomLigne = document.querySelector('#' + ligne + ' .ligne-header h2').innerText.replace('🔩', '').trim();
+            document.getElementById('modal-cadence-title').innerText = '🔩 ' + nomLigne;
+            document.getElementById('input-cadence').value = LIGNES[ligne].vitesse;
+            document.getElementById('modal-cadence').classList.add('active');
+            setTimeout(function() { document.getElementById('input-cadence').select(); }, 100);
+        }
+
+        function fermerReglageCadence() {
+            document.getElementById('modal-cadence').classList.remove('active');
+            ligneEnCoursReglage = null;
+        }
+
+        function sauverCadence() {
+            if (!ligneEnCoursReglage) return;
+            const val = parseInt(document.getElementById('input-cadence').value);
+            if (val > 0) {
+                LIGNES[ligneEnCoursReglage].vitesse = val;
+                storageSet('cadence-' + ligneEnCoursReglage, val);
+                calculer(ligneEnCoursReglage);
+            }
+            fermerReglageCadence();
+        }
+
+        function resetCadence() {
+            if (!ligneEnCoursReglage) return;
+            const defaut = CADENCES_DEFAUT[ligneEnCoursReglage];
+            LIGNES[ligneEnCoursReglage].vitesse = defaut;
+            storageRemove('cadence-' + ligneEnCoursReglage);
+            document.getElementById('input-cadence').value = defaut;
+            calculer(ligneEnCoursReglage);
+            fermerReglageCadence();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'modal-cadence') fermerReglageCadence();
+            if (e.target.id === 'modal-shift') fermerTimerShift();
+        });
+
         // ========== GESTION POSTE POUR L60 ==========
         let posteActuel = "arriere";
 
         function initialiserPoste() {
-            const saved = localStorage.getItem('l60-poste');
+            const saved = storageGet('l60-poste', 'arriere');
             if (saved === 'avant' || saved === 'arriere') {
                 posteActuel = saved;
             } else {
                 posteActuel = 'arriere';
             }
-            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
+            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(function(btn) {
                 const btnPoste = btn.getAttribute('data-poste');
                 if (btnPoste === posteActuel) {
                     btn.classList.add('active');
@@ -377,8 +724,8 @@
         function changerPoste(poste) {
             if (poste !== 'avant' && poste !== 'arriere') return;
             posteActuel = poste;
-            localStorage.setItem('l60-poste', poste);
-            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(btn => {
+            storageSet('l60-poste', poste);
+            document.querySelectorAll('#poste-selector-l60 .poste-btn').forEach(function(btn) {
                 const btnPoste = btn.getAttribute('data-poste');
                 if (btnPoste === poste) {
                     btn.classList.add('active');
@@ -391,8 +738,8 @@
 
         function attacherEvenementsPoste() {
             const btns = document.querySelectorAll('#poste-selector-l60 .poste-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
+            btns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
                     const poste = btn.getAttribute('data-poste');
                     changerPoste(poste);
                 });
@@ -401,51 +748,50 @@
 
         // ========== FONCTIONS STOCKAGE LOCAL ==========
         function sauvegarderValeur(ligne, champ, valeur) {
-            localStorage.setItem(`${ligne}-${champ}`, valeur);
+            storageSet(ligne + '-' + champ, valeur);
         }
-        function chargerValeur(ligne, champ, def = '') {
-            return localStorage.getItem(`${ligne}-${champ}`) ?? def;
+        function chargerValeur(ligne, champ, def) {
+            return storageGet(ligne + '-' + champ, def);
         }
         function effacerSauvegardeLigne(ligne) {
-            localStorage.removeItem(`${ligne}-total`);
-            localStorage.removeItem(`${ligne}-fait`);
+            storageRemove(ligne + '-total');
+            storageRemove(ligne + '-fait');
         }
         function chargerToutesLesDonnees() {
-            ['l60','l70','l74','l87'].forEach(ligne => {
-                const totalInput = document.getElementById(`total-${ligne}`);
-                const faitInput = document.getElementById(`fait-${ligne}`);
+            ['l60','l70','l74','l87'].forEach(function(ligne) {
+                const totalInput = document.getElementById('total-' + ligne);
+                const faitInput = document.getElementById('fait-' + ligne);
                 if(totalInput) totalInput.value = chargerValeur(ligne, 'total', '');
                 if(faitInput) faitInput.value = chargerValeur(ligne, 'fait', '0');
             });
         }
 
-// ========== FONCTION POUR EFFACER LE 0 AU FOCUS ==========
-function initialiserChampsSansZero() {
-    // Cible tous les champs "total" ET "fait"
-    const tousLesChamps = document.querySelectorAll('input[id^="total-"], input[id^="fait-"]');
-    tousLesChamps.forEach(champ => {
-        champ.addEventListener('focus', function() {
-            if (this.value === '0') {
-                this.value = '';
-            }
-        });
-        champ.addEventListener('blur', function() {
-            if (this.value === '' || this.value === null) {
-                this.value = '0';
-            }
-        });
-    });
-}
+        function initialiserChampsSansZero() {
+            const tousLesChamps = document.querySelectorAll('input[id^="total-"], input[id^="fait-"]');
+            tousLesChamps.forEach(function(champ) {
+                champ.addEventListener('focus', function() {
+                    if (this.value === '0') {
+                        this.value = '';
+                    }
+                });
+                champ.addEventListener('blur', function() {
+                    if (this.value === '' || this.value === null) {
+                        this.value = '0';
+                    }
+                });
+            });
+        }
 
         // ========== FONCTIONS PRINCIPALES ==========
         function switchTab(ligne) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab.${ligne}`).classList.add('active');
+            document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.content').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelector('.tab.' + ligne).classList.add('active');
             document.getElementById(ligne).classList.add('active');
         }
 
         function modifierPalette(ligne, direction) {
+            if (navigator.vibrate) navigator.vibrate(20);
             const input = document.getElementById('fait-' + ligne);
             let val = parseInt(input.value || 0);
             if(isNaN(val)) val = 0;
@@ -460,8 +806,7 @@ function initialiserChampsSansZero() {
             document.getElementById('fait-' + ligne).value = '0';
             document.getElementById('resultat-' + ligne).innerHTML = '';
             const fill = document.getElementById('progress-fill-' + ligne);
-            if(fill) fill.style.width = '0%';
-            if(fill) fill.innerText = '';
+            if(fill) { fill.style.width = '0%'; fill.innerText = ''; }
             const txt = document.getElementById('progress-text-' + ligne);
             if(txt) txt.innerText = 'Progression: 0%';
             effacerSauvegardeLigne(ligne);
@@ -483,15 +828,15 @@ function initialiserChampsSansZero() {
             sauvegarderValeur(ligne, 'fait', fait);
 
             const pourcent = total > 0 ? Math.min(100, (fait/total)*100) : 0;
-            const progressText = document.getElementById(`progress-text-${ligne}`);
-            const fillDiv = document.getElementById(`progress-fill-${ligne}`);
-            if(progressText) progressText.innerText = `Progression: ${pourcent.toFixed(1)}%`;
+            const progressText = document.getElementById('progress-text-' + ligne);
+            const fillDiv = document.getElementById('progress-fill-' + ligne);
+            if(progressText) progressText.innerText = 'Progression: ' + pourcent.toFixed(1) + '%';
             if(fillDiv) {
                 fillDiv.style.width = pourcent + '%';
                 fillDiv.innerText = pourcent > 15 ? fait.toLocaleString() : '';
             }
 
-            const resDiv = document.getElementById(`resultat-${ligne}`);
+            const resDiv = document.getElementById('resultat-' + ligne);
             if(total <= 0) {
                 resDiv.innerHTML = '<div class="card error">⚠️ Veuillez indiquer le total à produire</div>';
                 return;
@@ -510,8 +855,8 @@ function initialiserChampsSansZero() {
                 const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
                 const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
 
-                let html = `<div class="card">`;
-                html += `<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pièces</div></div>`;
+                let html = '<div class="card">';
+                html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
 
                 if (posteActuel === 'arriere') {
                     const tubesLaminesParBoite = 252;
@@ -521,21 +866,21 @@ function initialiserChampsSansZero() {
                     const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
                     const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
 
-                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
-                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité sécuritaire : ${capacitePlast.toLocaleString()}</div></div>`;
+                    html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">' + nbBoitesLam + ' boîtes</div><div>Capacité : ' + capaciteLam.toLocaleString() + ' tubes</div></div>';
+                    html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">' + nbBoitesPlast + ' boîtes</div><div>Capacité sécuritaire : ' + capacitePlast.toLocaleString() + '</div></div>';
                 } else {
                     const noticesParPaquet = 1200;
                     const nbPaquetsNotices = Math.ceil(reste / noticesParPaquet);
                     const etuisParBoite = 230;
                     const nbBoitesEtuis = Math.ceil(reste / etuisParBoite);
 
-                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div></div>`;
-                    html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight">${nbBoitesEtuis} boîtes</div></div>`;
+                    html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">' + nbPaquetsNotices + ' paquets</div></div>';
+                    html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Boîtes d\'étuis (230/boîte)</div><div class="resultat-highlight">' + nbBoitesEtuis + ' boîtes</div></div>';
                 }
 
-                html += `<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${h}h ${m}min</div><div>Fin estimée : ${fin}</div></div>`;
-                html += `<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">${colorant} kg</div></div>`;
-                html += `</div>`;
+                html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
+                html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+                html += '</div>';
                 resDiv.innerHTML = html;
                 return;
             }
@@ -549,28 +894,176 @@ function initialiserChampsSansZero() {
             const hh = Math.floor(minTot/60);
             const mm = Math.floor(minTot%60);
             const finH = new Date(Date.now() + minTot*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-            let html = `
-                <div class="card">
-                    <div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">${reste.toLocaleString()} pces</div></div>
-                    <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Conditionnement</div><div>• ${pal} palettes complètes<br>• ${niv} niveaux + ${boit} boîtes</div></div>
-                    <div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">${hh}h ${mm}min</div><div>Fin estimée : ${finH}</div></div>
-                    ${config.colorant ? `<div class="resultat-section"><div class="resultat-title">Colorant</div><div>${((reste/config.produitsParPalette)*config.colorant).toFixed(1)} kg</div></div>` : ''}
-                </div>`;
+            let html = '<div class="card">';
+            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pces</div></div>';
+            html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Conditionnement</div><div>• ' + pal + ' palettes complètes<br>• ' + niv + ' niveaux + ' + boit + ' boîtes</div></div>';
+            html += '<div class="resultat-section" style="border-left-color:#C5A028"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + hh + 'h ' + mm + 'min</div><div>Fin estimée : ' + finH + '</div></div>';
+            if (config.colorant) {
+                html += '<div class="resultat-section"><div class="resultat-title">Colorant</div><div>' + ((reste/config.produitsParPalette)*config.colorant).toFixed(1) + ' kg</div></div>';
+            }
+            html += '</div>';
             resDiv.innerHTML = html;
+        }
+
+        // ========== TIMER DE SHIFT (DISCRET) ==========
+        let shiftInterval = null;
+        let shiftActuel = 'matin';
+
+        const SHIFTS = {
+            matin: { debut: { h: 6, m: 5 }, fin: { h: 14, m: 5 }, label: 'Shift Matin ☀️' },
+            aprem: { debut: { h: 13, m: 55 }, fin: { h: 21, m: 55 }, label: 'Shift Après-midi 🌤️' }
+        };
+
+        function ouvrirTimerShift() {
+            if (navigator.vibrate) navigator.vibrate(20);
+            const saved = storageGet('shift-choisi', null);
+            if (saved === 'matin' || saved === 'aprem') {
+                shiftActuel = saved;
+            } else {
+                shiftActuel = detecterShiftAuto();
+            }
+            chargerRepas();
+            appliquerShiftUI();
+            document.getElementById('modal-shift').classList.add('active');
+            majTimerShift();
+            if (shiftInterval) clearInterval(shiftInterval);
+            shiftInterval = setInterval(majTimerShift, 1000);
+        }
+
+        function fermerTimerShift() {
+            document.getElementById('modal-shift').classList.remove('active');
+            if (shiftInterval) clearInterval(shiftInterval);
+        }
+
+        function detecterShiftAuto() {
+            const now = new Date();
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            const finMatin = 14 * 60 + 5;
+            return minutes < finMatin ? 'matin' : 'aprem';
+        }
+
+        function choisirShift(type) {
+            shiftActuel = type;
+            storageSet('shift-choisi', type);
+            appliquerShiftUI();
+            majTimerShift();
+        }
+
+        function appliquerShiftUI() {
+            document.getElementById('btn-shift-matin').classList.toggle('active', shiftActuel === 'matin');
+            document.getElementById('btn-shift-aprem').classList.toggle('active', shiftActuel === 'aprem');
+        }
+
+        function majTimerShift() {
+            const now = new Date();
+            const cfg = SHIFTS[shiftActuel];
+
+            let start = new Date(now);
+            start.setHours(cfg.debut.h, cfg.debut.m, 0, 0);
+            let end = new Date(now);
+            end.setHours(cfg.fin.h, cfg.fin.m, 0, 0);
+
+            const totalSec = (end - start) / 1000;
+            const elapsedSec = (now - start) / 1000;
+            const remainSec = Math.max(0, totalSec - elapsedSec);
+            const pourcent = Math.max(0, Math.min(100, (elapsedSec / totalSec) * 100));
+
+            const rh = Math.floor(remainSec / 3600);
+            const rm = Math.floor((remainSec % 3600) / 60);
+            const rs = Math.floor(remainSec % 60);
+
+            document.getElementById('shift-label').innerText = cfg.label;
+            document.getElementById('shift-countdown').innerText =
+                String(rh).padStart(2, '0') + ':' + String(rm).padStart(2, '0') + ':' + String(rs).padStart(2, '0');
+
+            document.getElementById('shift-end-time').innerText =
+                'Fin du shift à ' + String(cfg.fin.h).padStart(2, '0') + 'h' + String(cfg.fin.m).padStart(2, '0');
+            document.getElementById('shift-progress-fill').style.width = pourcent + '%';
+            document.getElementById('shift-progress-text').innerText = pourcent.toFixed(1) + '% du shift effectué';
+
+            const countdownEl = document.getElementById('shift-countdown');
+            if (remainSec === 0) {
+                countdownEl.style.color = '#C5A028';
+                document.getElementById('shift-countdown').innerText = 'FINI ! 🎉';
+            } else if (remainSec < 3600) {
+                countdownEl.style.color = '#2ecc71';
+            } else {
+                countdownEl.style.color = '#ffffff';
+            }
+
+            majTimerRepas();
+        }
+
+        // ========== TIMER REPAS (OPTIONNEL) ==========
+        function chargerRepas() {
+            const actif = storageGet('repas-actif', 'false') === 'true';
+            const heure = storageGet('repas-heure', '12:00');
+            document.getElementById('repas-actif').checked = actif;
+            document.getElementById('repas-heure').value = heure;
+            document.getElementById('repas-config').classList.toggle('visible', actif);
+        }
+
+        function toggleRepas() {
+            const actif = document.getElementById('repas-actif').checked;
+            storageSet('repas-actif', actif);
+            document.getElementById('repas-config').classList.toggle('visible', actif);
+            majTimerRepas();
+        }
+
+        function sauverHeureRepas() {
+            const heure = document.getElementById('repas-heure').value;
+            storageSet('repas-heure', heure);
+            majTimerRepas();
+        }
+
+        function majTimerRepas() {
+            const actif = document.getElementById('repas-actif').checked;
+            if (!actif) return;
+
+            const heure = document.getElementById('repas-heure').value;
+            if (!heure) return;
+
+            const parts = heure.split(':');
+            const h = parseInt(parts[0]);
+            const m = parseInt(parts[1]);
+            const now = new Date();
+            const repas = new Date(now);
+            repas.setHours(h, m, 0, 0);
+
+            const diff = (repas - now) / 1000;
+            const el = document.getElementById('repas-countdown');
+            const lbl = document.getElementById('repas-label');
+
+            if (diff > 0) {
+                const rh = Math.floor(diff / 3600);
+                const rm = Math.floor((diff % 3600) / 60);
+                const rs = Math.floor(diff % 60);
+                el.innerText = String(rh).padStart(2, '0') + ':' + String(rm).padStart(2, '0') + ':' + String(rs).padStart(2, '0');
+                el.classList.remove('passe');
+                lbl.innerText = 'avant la pause 🍴';
+            } else {
+                const passe = Math.abs(diff);
+                const rh = Math.floor(passe / 3600);
+                const rm = Math.floor((passe % 3600) / 60);
+                el.innerText = (rh > 0 ? rh + 'h ' : '') + rm + 'min';
+                el.classList.add('passe');
+                lbl.innerText = 'depuis la pause ✅';
+            }
         }
 
         // ========== INITIALISATION ==========
         function init() {
+            chargerCadences();
             chargerToutesLesDonnees();
             initialiserPoste();
             attacherEvenementsPoste();
             initialiserChampsSansZero();
             
-            ['l60','l70','l74','l87'].forEach(ligne => {
-                const totalInp = document.getElementById(`total-${ligne}`);
-                const faitInp = document.getElementById(`fait-${ligne}`);
-                if(totalInp) totalInp.addEventListener('input', () => { sauvegarderValeur(ligne, 'total', totalInp.value); calculer(ligne); });
-                if(faitInp) faitInp.addEventListener('input', () => { sauvegarderValeur(ligne, 'fait', faitInp.value); calculer(ligne); });
+            ['l60','l70','l74','l87'].forEach(function(ligne) {
+                const totalInp = document.getElementById('total-' + ligne);
+                const faitInp = document.getElementById('fait-' + ligne);
+                if(totalInp) totalInp.addEventListener('input', function() { sauvegarderValeur(ligne, 'total', totalInp.value); calculer(ligne); });
+                if(faitInp) faitInp.addEventListener('input', function() { sauvegarderValeur(ligne, 'fait', faitInp.value); calculer(ligne); });
                 calculer(ligne);
             });
         }
