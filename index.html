@@ -508,6 +508,7 @@
 
     const CADENCES_DEFAUT = { l60: 85, l70: 150, l74: 130, l87: 75 };
     let posteActuel = "arriere";  // pour L60
+    let alerteCorrigeeActive = false;  // Pour éviter les toasts redondants
 
     // ========== GÉNÉRATION DYNAMIQUE DE L'INTERFACE ==========
     function genererTabsEtContenus() {
@@ -658,25 +659,7 @@
             const faitInput = document.getElementById('fait-' + ligne);
             if (totalInput) totalInput.value = chargerValeur(ligne, 'total', '');
             if (faitInput) faitInput.value = chargerValeur(ligne, 'fait', '0');
-            // Correction : si total est vide on ne fait rien, sinon on vérifie fait <= total
-            verifierEtCorrigerFait(ligne);
         });
-    }
-
-    // Empêche fait > total
-    function verifierEtCorrigerFait(ligne) {
-        const totalInput = document.getElementById('total-' + ligne);
-        const faitInput = document.getElementById('fait-' + ligne);
-        if (!totalInput || !faitInput) return;
-        let total = parseInt(totalInput.value) || 0;
-        let fait = parseInt(faitInput.value) || 0;
-        if (total > 0 && fait > total) {
-            fait = total;
-            faitInput.value = fait;
-            sauvegarderValeur(ligne, 'fait', fait);
-            // Option : ajouter un bref message visuel
-            afficherAlerteTemporaire(`🔁 Production limitée à ${total} pièces (total)`);
-        }
     }
 
     function afficherAlerteTemporaire(message) {
@@ -730,7 +713,7 @@
         const txt = document.getElementById('progress-text-' + ligne);
         if (txt) txt.innerText = 'Progression: 0%';
         effacerSauvegardeLigne(ligne);
-        if (ligne === 'l60') calculer('l60');
+        calculer(ligne);
     }
 
     function ouvrirAvis() { window.open('https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog', '_blank'); }
@@ -750,12 +733,13 @@
             totalInput.classList.remove('total-obligatoire');
         }
 
-        // Correction active pour éviter >100%
+        // CORRECTION FUSIONNÉE : Correction active pour éviter >100%
+        let correctionAppliquee = false;
         if (fait > total) {
             fait = total;
             faitInput.value = fait;
             sauvegarderValeur(ligne, 'fait', fait);
-            afficherAlerteTemporaire(`⚠️ Production plafonnée à ${total} pièces`);
+            correctionAppliquee = true;
         }
 
         sauvegarderValeur(ligne, 'total', total);
@@ -775,6 +759,13 @@
         if (reste === 0) {
             resDiv.innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
             return;
+        }
+
+        // Afficher alerte une seule fois si correction appliquée
+        if (correctionAppliquee && !alerteCorrigeeActive) {
+            alerteCorrigeeActive = true;
+            afficherAlerteTemporaire(`⚠️ Production plafonnée à ${total} pièces`);
+            setTimeout(() => { alerteCorrigeeActive = false; }, 2500);
         }
 
         // Affichage spécifique L60 avec poste
@@ -797,7 +788,7 @@
                 const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
                 const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
                 html += '<div class="resultat-section"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">' + nbBoitesLam + ' boîtes</div><div>Capacité : ' + capaciteLam.toLocaleString() + ' tubes</div></div>';
-                html += '<div class="resultat-section"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">' + nbBoitesPlast + ' boîtes</div><div>Capacité : ' + capacitePlast.toLocaleString() + '</div></div>';
+                html += '<div class="resultat-section"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">' + nbBoitesPlast + ' boîtes</div><div>Capacité : ' + capacitePlast.toLocaleString() + ' tubes</div></div>';
             } else {
                 const noticesParPaquet = 1200;
                 const nbPaquetsNotices = Math.ceil(reste / noticesParPaquet);
@@ -814,7 +805,7 @@
             return;
         }
 
-        // Autres lignes
+        // Autres lignes (L70, L74, L87)
         const config = LIGNES[ligne];
         const pal = Math.floor(reste / config.produitsParPalette);
         const resteP = reste % config.produitsParPalette;
@@ -833,7 +824,7 @@
         resDiv.innerHTML = html;
     }
 
-    // ========== TIMER SHIFT (inchangé) ==========
+    // ========== TIMER SHIFT ==========
     let shiftInterval = null;
     let shiftActuel = 'matin';
     const SHIFTS = {
@@ -852,17 +843,55 @@
         shiftInterval = setInterval(majTimerShift, 1000);
     }
     function fermerTimerShift() { document.getElementById('modal-shift').classList.remove('active'); if (shiftInterval) clearInterval(shiftInterval); }
-    function detecterShiftAuto() { const now = new Date(); return (now.getHours()*60+now.getMinutes()) < 14*60+5 ? 'matin' : 'aprem'; }
+    
+    // CORRECTION : Meilleure détection automatique du shift avec gestion du chevauchement
+    function detecterShiftAuto() { 
+        const now = new Date();
+        const heureActuelle = now.getHours() * 60 + now.getMinutes();
+        
+        // Shift matin : 6h05 - 14h05
+        // Shift aprem : 13h55 - 21h55
+        // Chevauchement : 13h55 - 14h05 (10 minutes)
+        
+        const finMatin = 14 * 60 + 5;  // 845 minutes
+        const debutAprem = 13 * 60 + 55; // 835 minutes
+        
+        if (heureActuelle < debutAprem) {
+            return 'matin';
+        } else if (heureActuelle >= debutAprem && heureActuelle < finMatin) {
+            // Zone de chevauchement : préférer le shift en cours (aprem)
+            return 'aprem';
+        } else {
+            return 'aprem';
+        }
+    }
+    
     function choisirShift(type) { shiftActuel = type; storageSet('shift-choisi', type); appliquerShiftUI(); majTimerShift(); }
     function appliquerShiftUI() {
         document.getElementById('btn-shift-matin').classList.toggle('active', shiftActuel === 'matin');
         document.getElementById('btn-shift-aprem').classList.toggle('active', shiftActuel === 'aprem');
     }
+    
+    // CORRECTION : Gestion correcte du passage minuit
     function majTimerShift() {
         const now = new Date();
         const cfg = SHIFTS[shiftActuel];
-        let start = new Date(now); start.setHours(cfg.debut.h, cfg.debut.m, 0, 0);
-        let end = new Date(now); end.setHours(cfg.fin.h, cfg.fin.m, 0, 0);
+        let start = new Date(now); 
+        start.setHours(cfg.debut.h, cfg.debut.m, 0, 0);
+        let end = new Date(now); 
+        end.setHours(cfg.fin.h, cfg.fin.m, 0, 0);
+        
+        // Gestion du passage minuit pour le shift aprem (21h55)
+        if (shiftActuel === 'aprem' && now.getHours() < 6) {
+            start.setDate(start.getDate() - 1);
+        }
+        
+        // Ajustement si le shift n'a pas encore commencé (décaler d'un jour avant)
+        if (now < start) {
+            start.setDate(start.getDate() - 1);
+            end.setDate(end.getDate() - 1);
+        }
+        
         const totalSec = (end - start) / 1000;
         const elapsedSec = (now - start) / 1000;
         const remainSec = Math.max(0, totalSec - elapsedSec);
@@ -870,6 +899,7 @@
         const rh = Math.floor(remainSec / 3600);
         const rm = Math.floor((remainSec % 3600) / 60);
         const rs = Math.floor(remainSec % 60);
+        
         document.getElementById('shift-label').innerText = cfg.label;
         document.getElementById('shift-countdown').innerText = `${String(rh).padStart(2,'0')}:${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
         document.getElementById('shift-end-time').innerText = `Fin du shift à ${String(cfg.fin.h).padStart(2,'0')}h${String(cfg.fin.m).padStart(2,'0')}`;
@@ -881,6 +911,7 @@
         else countdownEl.style.color = '#ffffff';
         majTimerRepas();
     }
+    
     function chargerRepas() {
         const actif = storageGet('repas-actif', 'false') === 'true';
         const heure = storageGet('repas-heure', '12:00');
@@ -939,14 +970,12 @@
             if (totalInp) {
                 totalInp.addEventListener('input', () => {
                     sauvegarderValeur(ligne, 'total', totalInp.value);
-                    verifierEtCorrigerFait(ligne);
                     calculer(ligne);
                 });
             }
             if (faitInp) {
                 faitInp.addEventListener('input', () => {
                     sauvegarderValeur(ligne, 'fait', faitInp.value);
-                    verifierEtCorrigerFait(ligne);
                     calculer(ligne);
                 });
             }
