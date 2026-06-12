@@ -1,4 +1,4 @@
-const CACHE_NAME = 'loreal-prod-v1';
+const CACHE_NAME = 'loreal-prod-v3';   // ← changez ce chiffre à chaque mise à jour
 const urlsToCache = [
   '.',
   'index.html',
@@ -7,24 +7,42 @@ const urlsToCache = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
+  self.skipWaiting();   // force l'activation immédiate
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.map(key => {
-        if (key !== CACHE_NAME) return caches.delete(key);
+        if (key !== CACHE_NAME) {
+          console.log('Ancien cache supprimé :', key);
+          return caches.delete(key);
+        }
       })
     ))
   );
+  event.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  if (url.pathname === '/' || url.pathname === '/index.html') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(response => response || fetch(event.request))
+    );
+  }
 });
