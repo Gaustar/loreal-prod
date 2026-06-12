@@ -413,7 +413,7 @@
 <body>
 
 <div class="header">
-    <h1>L'ORÉAL <span class="icon-timer" onclick="ouvrirTimerShift()">⏱️</span></h1>
+    <h1>L'ORÉAL <span class="icon-timer" onclick="ouvrirTimerShift()" title="Voir le temps de shift et pause repas">⏱️ Shift</span></h1>
     <p>Suivi de Production</p>
 </div>
 
@@ -433,7 +433,7 @@
         <h3 id="modal-cadence-title">🔩 Cadence</h3>
         <div class="form-group" style="margin-bottom: 15px;">
             <label class="form-label">Pièces par minute :</label>
-            <input type="number" id="input-cadence" class="form-input" style="font-size: 24px; text-align: center;" min="1">
+            <input type="number" id="input-cadence" class="form-input" style="font-size: 24px; text-align: center;" min="1" step="1">
         </div>
         <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
             <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageCadence()">Annuler</button>
@@ -481,7 +481,7 @@
             produitsParBoite: 6,
             vitesse: 72,
             colorant: 35,
-            hasPoste: true  // spécifique : poste avant/arrière
+            hasPoste: true
         },
         l70: {
             nom: "L70",
@@ -507,10 +507,10 @@
     };
 
     const CADENCES_DEFAUT = { l60: 72, l70: 150, l74: 130, l87: 75 };
-    let posteActuel = "arriere";  // pour L60
-    let alerteCorrigeeActive = false;  // Pour éviter les toasts redondants
+    let posteActuel = "arriere";
+    let alerteCorrigeeActive = false;
 
-    // ========== GÉNÉRATION DYNAMIQUE DE L'INTERFACE ==========
+    // ========== GÉNÉRATION DYNAMIQUE ==========
     function genererTabsEtContenus() {
         const tabsContainer = document.getElementById('tabs-container');
         const contentsContainer = document.getElementById('contents-container');
@@ -518,7 +518,6 @@
         contentsContainer.innerHTML = '';
 
         Object.keys(LIGNES).forEach((ligneId, index) => {
-            // Onglet
             const tabBtn = document.createElement('button');
             tabBtn.className = `tab ${ligneId}`;
             if (index === 0) tabBtn.classList.add('active');
@@ -526,7 +525,6 @@
             tabBtn.onclick = () => switchTab(ligneId);
             tabsContainer.appendChild(tabBtn);
 
-            // Conteneur de contenu
             const contentDiv = document.createElement('div');
             contentDiv.id = ligneId;
             contentDiv.className = 'content';
@@ -576,12 +574,12 @@
         `;
     }
 
-    // ========== FONCTIONS UTILITAIRES ==========
+    // ========== STOCKAGE ==========
     function storageSet(key, value) { try { localStorage.setItem(key, value); } catch(e) {} }
     function storageGet(key, def) { try { const val = localStorage.getItem(key); return val !== null ? val : def; } catch(e) { return def; } }
     function storageRemove(key) { try { localStorage.removeItem(key); } catch(e) {} }
 
-    // ========== GESTION CADENCE ==========
+    // ========== CADENCE ==========
     let ligneEnCoursReglage = null;
     function chargerCadences() {
         Object.keys(LIGNES).forEach(ligne => {
@@ -590,7 +588,6 @@
         });
     }
     function ouvrirReglageCadence(ligne) {
-        if (navigator.vibrate) navigator.vibrate(30);
         ligneEnCoursReglage = ligne;
         document.getElementById('modal-cadence-title').innerText = '🔩 Ligne ' + LIGNES[ligne].nom;
         document.getElementById('input-cadence').value = LIGNES[ligne].vitesse;
@@ -618,7 +615,7 @@
         fermerReglageCadence();
     }
 
-    // ========== GESTION POSTE L60 ==========
+    // ========== POSTE L60 ==========
     function initialiserPoste() {
         const saved = storageGet('l60-poste', 'arriere');
         posteActuel = (saved === 'avant' || saved === 'arriere') ? saved : 'arriere';
@@ -648,7 +645,7 @@
         }
     }
 
-    // ========== SAUVEGARDE / CHARGEMENT DONNÉES ==========
+    // ========== SAUVEGARDE / CHARGEMENT ==========
     function sauvegarderValeur(ligne, champ, valeur) { storageSet(ligne + '-' + champ, valeur); }
     function chargerValeur(ligne, champ, def) { return storageGet(ligne + '-' + champ, def); }
     function effacerSauvegardeLigne(ligne) { storageRemove(ligne + '-total'); storageRemove(ligne + '-fait'); }
@@ -689,18 +686,23 @@
     }
 
     function modifierPalette(ligne, direction) {
-        if (navigator.vibrate) navigator.vibrate(20);
-        const input = document.getElementById('fait-' + ligne);
-        let val = parseInt(input.value || 0);
-        if (isNaN(val)) val = 0;
         const totalInput = document.getElementById('total-' + ligne);
         let total = parseInt(totalInput.value) || 0;
+        
+        if (total <= 0 && direction === 1) {
+            afficherAlerteTemporaire("⚠️ Veuillez d'abord saisir la quantité totale à produire");
+            return;
+        }
+        
+        const faitInput = document.getElementById('fait-' + ligne);
+        let val = parseInt(faitInput.value) || 0;
+        if (isNaN(val)) val = 0;
         const modif = LIGNES[ligne].produitsParPalette * direction;
         let nouvelleValeur = val + modif;
         if (total > 0 && nouvelleValeur > total) nouvelleValeur = total;
         if (nouvelleValeur < 0) nouvelleValeur = 0;
-        input.value = nouvelleValeur;
-        sauvegarderValeur(ligne, 'fait', input.value);
+        faitInput.value = nouvelleValeur;
+        sauvegarderValeur(ligne, 'fait', faitInput.value);
         calculer(ligne);
     }
 
@@ -723,8 +725,13 @@
         const faitInput = document.getElementById('fait-' + ligne);
         let total = parseInt(totalInput.value) || 0;
         let fait = parseInt(faitInput.value) || 0;
-
-        // Obligation : total doit être renseigné et >0
+        
+        if (fait < 0) {
+            fait = 0;
+            faitInput.value = 0;
+            sauvegarderValeur(ligne, 'fait', 0);
+        }
+        
         if (total <= 0) {
             document.getElementById('resultat-' + ligne).innerHTML = '<div class="card error">⚠️ Veuillez renseigner la quantité totale à produire</div>';
             totalInput.classList.add('total-obligatoire');
@@ -732,8 +739,7 @@
         } else {
             totalInput.classList.remove('total-obligatoire');
         }
-
-        // CORRECTION FUSIONNÉE : Correction active pour éviter >100%
+        
         let correctionAppliquee = false;
         if (fait > total) {
             fait = total;
@@ -741,10 +747,10 @@
             sauvegarderValeur(ligne, 'fait', fait);
             correctionAppliquee = true;
         }
-
+        
         sauvegarderValeur(ligne, 'total', total);
         sauvegarderValeur(ligne, 'fait', fait);
-
+        
         const pourcent = total > 0 ? Math.min(100, (fait/total)*100) : 0;
         const progressText = document.getElementById('progress-text-' + ligne);
         const fillDiv = document.getElementById('progress-fill-' + ligne);
@@ -753,22 +759,20 @@
             fillDiv.style.width = pourcent + '%';
             fillDiv.innerText = pourcent > 15 ? fait.toLocaleString() : '';
         }
-
+        
         const resDiv = document.getElementById('resultat-' + ligne);
         const reste = Math.max(0, total - fait);
         if (reste === 0) {
             resDiv.innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
             return;
         }
-
-        // Afficher alerte une seule fois si correction appliquée
+        
         if (correctionAppliquee && !alerteCorrigeeActive) {
             alerteCorrigeeActive = true;
             afficherAlerteTemporaire(`⚠️ Production plafonnée à ${total} pièces`);
-            setTimeout(() => { alerteCorrigeeActive = false; }, 2500);
+            setTimeout(() => { alerteCorrigeeActive = false; }, 2000);
         }
-
-        // Affichage spécifique L60 avec poste
+        
         if (ligne === 'l60') {
             const config = LIGNES.l60;
             const minTotales = reste / config.vitesse;
@@ -776,10 +780,9 @@
             const m = Math.floor(minTotales%60);
             const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
-
+            
             let html = '<div class="card">';
             html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
-
             if (posteActuel === 'arriere') {
                 const tubesLaminesParBoite = 252;
                 const nbBoitesLam = Math.round(reste / tubesLaminesParBoite);
@@ -797,15 +800,13 @@
                 html += '<div class="resultat-section"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">' + nbPaquetsNotices + ' paquets</div></div>';
                 html += '<div class="resultat-section"><div class="resultat-title">Boîtes d\'étuis (230/boîte)</div><div class="resultat-highlight">' + nbBoitesEtuis + ' boîtes</div></div>';
             }
-
             html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
             html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
             html += '</div>';
             resDiv.innerHTML = html;
             return;
         }
-
-        // Autres lignes (L70, L74, L87)
+        
         const config = LIGNES[ligne];
         const pal = Math.floor(reste / config.produitsParPalette);
         const resteP = reste % config.produitsParPalette;
@@ -824,15 +825,46 @@
         resDiv.innerHTML = html;
     }
 
-    // ========== TIMER SHIFT ==========
+    // ========== TIMER SHIFT AMÉLIORÉ ==========
     let shiftInterval = null;
     let shiftActuel = 'matin';
     const SHIFTS = {
         matin: { debut: { h: 6, m: 5 }, fin: { h: 14, m: 5 }, label: 'Shift Matin ☀️' },
         aprem: { debut: { h: 13, m: 55 }, fin: { h: 21, m: 55 }, label: 'Shift Après-midi 🌤️' }
     };
+    
+    function getShiftWindow(type, now) {
+        let start = new Date(now);
+        start.setHours(SHIFTS[type].debut.h, SHIFTS[type].debut.m, 0, 0);
+        let end = new Date(now);
+        end.setHours(SHIFTS[type].fin.h, SHIFTS[type].fin.m, 0, 0);
+        
+        if (now < start) {
+            return { start, end, status: 'avant' };
+        }
+        if (now > end) {
+            if (type === 'matin') {
+                let nextStart = new Date(now);
+                nextStart.setDate(now.getDate() + 1);
+                nextStart.setHours(SHIFTS.matin.debut.h, SHIFTS.matin.debut.m, 0, 0);
+                let nextEnd = new Date(now);
+                nextEnd.setDate(now.getDate() + 1);
+                nextEnd.setHours(SHIFTS.matin.fin.h, SHIFTS.matin.fin.m, 0, 0);
+                return { start: nextStart, end: nextEnd, status: 'futur' };
+            } else {
+                let nextStart = new Date(now);
+                nextStart.setDate(now.getDate() + 1);
+                nextStart.setHours(SHIFTS.aprem.debut.h, SHIFTS.aprem.debut.m, 0, 0);
+                let nextEnd = new Date(now);
+                nextEnd.setDate(now.getDate() + 1);
+                nextEnd.setHours(SHIFTS.aprem.fin.h, SHIFTS.aprem.fin.m, 0, 0);
+                return { start: nextStart, end: nextEnd, status: 'futur' };
+            }
+        }
+        return { start, end, status: 'pendant' };
+    }
+    
     function ouvrirTimerShift() {
-        if (navigator.vibrate) navigator.vibrate(20);
         const saved = storageGet('shift-choisi', null);
         shiftActuel = (saved === 'matin' || saved === 'aprem') ? saved : detecterShiftAuto();
         chargerRepas();
@@ -842,74 +874,81 @@
         if (shiftInterval) clearInterval(shiftInterval);
         shiftInterval = setInterval(majTimerShift, 1000);
     }
-    function fermerTimerShift() { document.getElementById('modal-shift').classList.remove('active'); if (shiftInterval) clearInterval(shiftInterval); }
     
-    // CORRECTION : Meilleure détection automatique du shift avec gestion du chevauchement
-    function detecterShiftAuto() { 
-        const now = new Date();
-        const heureActuelle = now.getHours() * 60 + now.getMinutes();
-        
-        // Shift matin : 6h05 - 14h05
-        // Shift aprem : 13h55 - 21h55
-        // Chevauchement : 13h55 - 14h05 (10 minutes)
-        
-        const finMatin = 14 * 60 + 5;  // 845 minutes
-        const debutAprem = 13 * 60 + 55; // 835 minutes
-        
-        if (heureActuelle < debutAprem) {
-            return 'matin';
-        } else if (heureActuelle >= debutAprem && heureActuelle < finMatin) {
-            // Zone de chevauchement : préférer le shift en cours (aprem)
-            return 'aprem';
-        } else {
-            return 'aprem';
-        }
+    function fermerTimerShift() { 
+        document.getElementById('modal-shift').classList.remove('active'); 
+        if (shiftInterval) clearInterval(shiftInterval); 
     }
     
-    function choisirShift(type) { shiftActuel = type; storageSet('shift-choisi', type); appliquerShiftUI(); majTimerShift(); }
+    function detecterShiftAuto() {
+        const now = new Date();
+        const heureActuelle = now.getHours() * 60 + now.getMinutes();
+        const debutAprem = 13 * 60 + 55;
+        const finMatin = 14 * 60 + 5;
+        if (heureActuelle < debutAprem) return 'matin';
+        if (heureActuelle >= debutAprem && heureActuelle < finMatin) return 'aprem';
+        return 'aprem';
+    }
+    
+    function choisirShift(type) { 
+        shiftActuel = type; 
+        storageSet('shift-choisi', type); 
+        appliquerShiftUI(); 
+        majTimerShift(); 
+    }
+    
     function appliquerShiftUI() {
         document.getElementById('btn-shift-matin').classList.toggle('active', shiftActuel === 'matin');
         document.getElementById('btn-shift-aprem').classList.toggle('active', shiftActuel === 'aprem');
     }
     
-    // CORRECTION : Gestion correcte du passage minuit
     function majTimerShift() {
         const now = new Date();
-        const cfg = SHIFTS[shiftActuel];
-        let start = new Date(now); 
-        start.setHours(cfg.debut.h, cfg.debut.m, 0, 0);
-        let end = new Date(now); 
-        end.setHours(cfg.fin.h, cfg.fin.m, 0, 0);
+        const windowInfo = getShiftWindow(shiftActuel, now);
+        const { start, end, status } = windowInfo;
         
-        // Gestion du passage minuit pour le shift aprem (21h55)
-        if (shiftActuel === 'aprem' && now.getHours() < 6) {
-            start.setDate(start.getDate() - 1);
+        let remainSec, pourcent;
+        let finTexte = `Fin du shift à ${String(SHIFTS[shiftActuel].fin.h).padStart(2,'0')}h${String(SHIFTS[shiftActuel].fin.m).padStart(2,'0')}`;
+        
+        if (status === 'avant') {
+            remainSec = (start - now) / 1000;
+            document.getElementById('shift-countdown').innerText = formatTime(remainSec);
+            document.getElementById('shift-progress-fill').style.width = '0%';
+            document.getElementById('shift-progress-text').innerText = "Le shift n'a pas encore commencé";
+            document.getElementById('shift-end-time').innerHTML = `Début à ${String(SHIFTS[shiftActuel].debut.h).padStart(2,'0')}h${String(SHIFTS[shiftActuel].debut.m).padStart(2,'0')}`;
+            return;
+        } else if (status === 'futur') {
+            remainSec = (start - now) / 1000;
+            document.getElementById('shift-countdown').innerText = formatTime(remainSec);
+            document.getElementById('shift-progress-fill').style.width = '0%';
+            document.getElementById('shift-progress-text').innerText = "Prochain shift";
+            document.getElementById('shift-end-time').innerHTML = `Début demain à ${String(SHIFTS[shiftActuel].debut.h).padStart(2,'0')}h${String(SHIFTS[shiftActuel].debut.m).padStart(2,'0')}`;
+            return;
+        } else {
+            const totalSec = (end - start) / 1000;
+            const elapsedSec = (now - start) / 1000;
+            remainSec = Math.max(0, totalSec - elapsedSec);
+            pourcent = Math.min(100, (elapsedSec / totalSec) * 100);
+            document.getElementById('shift-countdown').innerText = formatTime(remainSec);
+            document.getElementById('shift-progress-fill').style.width = pourcent + '%';
+            document.getElementById('shift-progress-text').innerText = pourcent.toFixed(1) + '% du shift effectué';
+            document.getElementById('shift-end-time').innerHTML = finTexte;
         }
         
-        // Ajustement si le shift n'a pas encore commencé (décaler d'un jour avant)
-        if (now < start) {
-            start.setDate(start.getDate() - 1);
-            end.setDate(end.getDate() - 1);
-        }
-        
-        const totalSec = (end - start) / 1000;
-        const elapsedSec = (now - start) / 1000;
-        const remainSec = Math.max(0, totalSec - elapsedSec);
-        const pourcent = Math.max(0, Math.min(100, (elapsedSec / totalSec) * 100));
-        const rh = Math.floor(remainSec / 3600);
-        const rm = Math.floor((remainSec % 3600) / 60);
-        const rs = Math.floor(remainSec % 60);
-        
-        document.getElementById('shift-label').innerText = cfg.label;
-        document.getElementById('shift-countdown').innerText = `${String(rh).padStart(2,'0')}:${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
-        document.getElementById('shift-end-time').innerText = `Fin du shift à ${String(cfg.fin.h).padStart(2,'0')}h${String(cfg.fin.m).padStart(2,'0')}`;
-        document.getElementById('shift-progress-fill').style.width = pourcent + '%';
-        document.getElementById('shift-progress-text').innerText = pourcent.toFixed(1) + '% du shift effectué';
         const countdownEl = document.getElementById('shift-countdown');
         if (remainSec === 0) countdownEl.style.color = '#C5A028';
         else if (remainSec < 3600) countdownEl.style.color = '#2ecc71';
         else countdownEl.style.color = '#ffffff';
+        
         majTimerRepas();
+    }
+    
+    function formatTime(sec) {
+        if (sec < 0) sec = 0;
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = Math.floor(sec % 60);
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
     
     function chargerRepas() {
@@ -918,17 +957,21 @@
         document.getElementById('repas-actif').checked = actif;
         document.getElementById('repas-heure').value = heure;
         document.getElementById('repas-config').classList.toggle('visible', actif);
+        majTimerRepas();
     }
+    
     function toggleRepas() {
         const actif = document.getElementById('repas-actif').checked;
         storageSet('repas-actif', actif);
         document.getElementById('repas-config').classList.toggle('visible', actif);
         majTimerRepas();
     }
+    
     function sauverHeureRepas() {
         storageSet('repas-heure', document.getElementById('repas-heure').value);
         majTimerRepas();
     }
+    
     function majTimerRepas() {
         const actif = document.getElementById('repas-actif').checked;
         if (!actif) return;
@@ -936,21 +979,18 @@
         if (!heure) return;
         const [h, m] = heure.split(':').map(Number);
         const now = new Date();
-        const repas = new Date(now); repas.setHours(h, m, 0, 0);
+        const repas = new Date(now);
+        repas.setHours(h, m, 0, 0);
         const diff = (repas - now) / 1000;
         const el = document.getElementById('repas-countdown');
         const lbl = document.getElementById('repas-label');
         if (diff > 0) {
-            const rh = Math.floor(diff / 3600);
-            const rm = Math.floor((diff % 3600) / 60);
-            const rs = Math.floor(diff % 60);
-            el.innerText = `${String(rh).padStart(2,'0')}:${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')}`;
+            el.innerText = formatTime(diff);
             el.classList.remove('passe');
             lbl.innerText = 'avant la pause 🍴';
         } else {
             const passe = Math.abs(diff);
-            const rm = Math.floor(passe / 60);
-            el.innerText = `${rm} min`;
+            el.innerText = formatTime(passe);
             el.classList.add('passe');
             lbl.innerText = 'depuis la pause ✅';
         }
@@ -963,7 +1003,6 @@
         chargerToutesLesDonnees();
         initialiserPoste();
         attacherEvenementsPoste();
-        // Écouteurs génériques pour les inputs
         Object.keys(LIGNES).forEach(ligne => {
             const totalInp = document.getElementById('total-' + ligne);
             const faitInp = document.getElementById('fait-' + ligne);
@@ -975,7 +1014,11 @@
             }
             if (faitInp) {
                 faitInp.addEventListener('input', () => {
-                    sauvegarderValeur(ligne, 'fait', faitInp.value);
+                    let val = parseInt(faitInp.value);
+                    if (isNaN(val)) val = 0;
+                    if (val < 0) val = 0;
+                    faitInp.value = val;
+                    sauvegarderValeur(ligne, 'fait', val);
                     calculer(ligne);
                 });
             }
@@ -983,6 +1026,15 @@
         });
         document.getElementById('modal-cadence').addEventListener('click', (e) => { if(e.target.id === 'modal-cadence') fermerReglageCadence(); });
         document.getElementById('modal-shift').addEventListener('click', (e) => { if(e.target.id === 'modal-shift') fermerTimerShift(); });
+        
+        // Enregistrement du service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('Service Worker enregistré', reg);
+            }).catch(err => {
+                console.log('Erreur Service Worker :', err);
+            });
+        }
     }
     init();
 </script>
