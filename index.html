@@ -573,6 +573,21 @@
                     <label class="form-label">Déjà produit :</label>
                     <input type="number" id="fait-${ligneId}" class="form-input" value="0" min="0" step="1">
                 </div>
+                
+                ${config.colorant ? `
+                <div class="form-group" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                    <label class="repas-toggle" style="justify-content: flex-start; cursor: pointer;">
+                        <input type="checkbox" id="check-cuve-${ligneId}" onchange="calculer('${ligneId}')">
+                        <div class="repas-switch"></div>
+                        <span style="font-weight: 600; color: #333; font-size: 14px;">🧪 Vérifier limite cuve (min. 50kg)</span>
+                    </label>
+                    <div id="config-cuve-${ligneId}" class="repas-config" style="margin-top: 10px;">
+                        <label class="form-label">Poids actuel dans la cuve (kg) :</label>
+                        <input type="number" id="poids-cuve-${ligneId}" class="form-input" placeholder="Ex: 200" min="0" step="1" oninput="calculer('${ligneId}')" style="font-size: 18px;">
+                    </div>
+                </div>
+                ` : ''}
+
                 <div class="button-group">
                     <button class="btn btn-retirer" onclick="modifierPalette('${ligneId}', -1)">➖ PALETTE</button>
                     <button class="btn btn-ajouter" onclick="modifierPalette('${ligneId}', 1)">➕ PALETTE</button>
@@ -783,6 +798,8 @@
             setTimeout(() => { alerteCorrigeeActive = false; }, 2000);
         }
         
+        let html = '<div class="card">';
+        
         if (ligne === 'l60') {
             const config = LIGNES.l60;
             const minTotales = reste / config.vitesse;
@@ -791,7 +808,6 @@
             const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
             
-            let html = '<div class="card">';
             html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
             if (posteActuel === 'arriere') {
                 const tubesLaminesParBoite = 252;
@@ -814,6 +830,52 @@
             }
             html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
             html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+            
+            // === NOUVEAU : Calcul de la limite de cuve pour la L60 ===
+            const checkCuve = document.getElementById(`check-cuve-${ligne}`);
+            if (checkCuve && checkCuve.checked) {
+                const poidsActuel = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
+                const configDiv = document.getElementById(`config-cuve-${ligne}`);
+                if(configDiv) configDiv.classList.toggle('visible', checkCuve.checked);
+
+                if (poidsActuel > 50) {
+                    const poidsUtilisable = poidsActuel - 50;
+                    const palettesPossibles = Math.floor(poidsUtilisable / config.colorant);
+                    const piecesPossibles = palettesPossibles * config.produitsParPalette;
+                    const isSufficient = piecesPossibles >= reste;
+                    const borderColor = isSufficient ? '#2ecc71' : '#e74c3c';
+                    const bgColor = isSufficient ? '#eafaf1' : '#fdedec';
+                    const icon = isSufficient ? '✅' : '⚠️';
+                    const message = isSufficient ? "Suffisant pour atteindre votre objectif." : "La cuve sera épuisée AVANT la fin de l'objectif !";
+
+                    html += `
+                        <div class="resultat-section" style="border-left: 5px solid ${borderColor}; background: ${bgColor}; margin-top: 15px;">
+                            <div class="resultat-title">🧪 Limite de la cuve actuelle</div>
+                            <div class="resultat-highlight" style="color: ${borderColor}; font-size: 32px; margin: 10px 0;">
+                                ${piecesPossibles.toLocaleString()} pièces
+                            </div>
+                            <div style="font-size: 14px; color: #555;">
+                                C'est le nombre maximum de pièces que vous pouvez produire avant d'atteindre les 50 kg minimum.
+                            </div>
+                            <div style="font-size: 15px; font-weight: bold; margin-top: 10px; color: ${borderColor};">
+                                ${icon} ${message}
+                            </div>
+                        </div>
+                    `;
+                } else if (poidsActuel > 0 && poidsActuel <= 50) {
+                    html += `
+                        <div class="resultat-section" style="border-left: 5px solid #e74c3c; background: #fdedec; margin-top: 15px;">
+                            <div class="resultat-title">🧪 Limite de la cuve actuelle</div>
+                            <div class="resultat-highlight" style="color: #e74c3c; font-size: 32px; margin: 10px 0;">0 pièce</div>
+                            <div style="font-size: 14px; color: #555; font-weight: bold;">
+                                ⚠️ Le poids est déjà inférieur ou égal à 50 kg. La cuve doit être changée immédiatement.
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            // ==========================================================
+            
             html += '</div>';
             resDiv.innerHTML = html;
             return;
@@ -828,7 +890,7 @@
         const hh = Math.floor(minTot/60);
         const mm = Math.floor(minTot%60);
         const finH = new Date(Date.now() + minTot*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-        let html = '<div class="card">';
+        
         html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pces</div></div>';
         html += '<div class="resultat-section"><div class="resultat-title">Conditionnement</div><div>• ' + pal + ' palettes complètes<br>• ' + niv + ' niveaux + ' + boit + ' boîtes</div></div>';
         html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + hh + 'h ' + mm + 'min</div><div>Fin estimée : ' + finH + '</div></div>';
@@ -837,7 +899,7 @@
         resDiv.innerHTML = html;
     }
 
-    // ========== TIMER SHIFT AMÉLIORÉ (sans mémorisation, ouverture auto selon heure) ==========
+    // ========== TIMER SHIFT AMÉLIORÉ ==========
     let shiftInterval = null;
     let shiftActuel = 'matin';
     const SHIFTS = {
@@ -876,7 +938,6 @@
         return { start, end, status: 'pendant' };
     }
     
-    // Détection du shift actuel basée uniquement sur l'heure réelle
     function detecterShiftAuto() {
         const now = new Date();
         const heureActuelle = now.getHours() * 60 + now.getMinutes();
@@ -888,11 +949,8 @@
     }
     
     function ouvrirTimerShift() {
-        // On force la détection selon l'heure réelle (pas de stockage)
         shiftActuel = detecterShiftAuto();
-        // On met à jour l'interface des boutons
         appliquerShiftUI();
-        // Charger les préférences repas (stockées)
         chargerRepas();
         document.getElementById('modal-shift').classList.add('active');
         majTimerShift();
@@ -909,7 +967,6 @@
         shiftActuel = type; 
         appliquerShiftUI(); 
         majTimerShift(); 
-        // On ne sauvegarde pas le choix, car on veut que l'ouverture se base toujours sur l'heure
     }
     
     function appliquerShiftUI() {
@@ -1042,7 +1099,6 @@
         document.getElementById('modal-cadence').addEventListener('click', (e) => { if(e.target.id === 'modal-cadence') fermerReglageCadence(); });
         document.getElementById('modal-shift').addEventListener('click', (e) => { if(e.target.id === 'modal-shift') fermerTimerShift(); });
         
-        // Enregistrement du service worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(reg => {
                 console.log('Service Worker enregistré', reg);
