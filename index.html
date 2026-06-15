@@ -732,13 +732,12 @@
         faitInput.value = nouvelleValeur;
         sauvegarderValeur(ligne, 'fait', faitInput.value);
 
-        // CORRECTION : Mise à jour automatique du poids de la cuve (le poids DIMINUE quand on ajoute une palette)
+        // Mise à jour automatique du poids de la cuve (le poids DIMINUE quand on ajoute une palette)
         if (ligne === 'l60') {
             const poidsInput = document.getElementById('poids-cuve-l60');
             const checkCuve = document.getElementById('check-cuve-l60');
             if (checkCuve && checkCuve.checked && poidsInput && poidsInput.value !== '') {
                 let poidsActuel = parseFloat(poidsInput.value) || 0;
-                // On SOUSTRAIT le poids d'une palette quand on en ajoute une (direction = 1)
                 let nouveauPoids = poidsActuel - (LIGNES.l60.colorant * direction);
                 if (nouveauPoids < 0) nouveauPoids = 0;
                 poidsInput.value = nouveauPoids;
@@ -757,20 +756,18 @@
         const txt = document.getElementById('progress-text-' + ligne);
         if (txt) txt.innerText = 'Progression: 0%';
         
-        // Réinitialisation spécifique de la cuve
         if (ligne === 'l60') {
             const checkCuve = document.getElementById('check-cuve-l60');
             const poidsInput = document.getElementById('poids-cuve-l60');
             if (checkCuve) checkCuve.checked = false;
             if (poidsInput) poidsInput.value = '';
-            toggleCuveUI(ligne); // Pour cacher le champ
+            toggleCuveUI(ligne);
         }
 
         effacerSauvegardeLigne(ligne);
         calculer(ligne);
     }
 
-    // Afficher/Masquer le champ de poids de la cuve
     function toggleCuveUI(ligneId) {
         const checkCuve = document.getElementById(`check-cuve-${ligneId}`);
         const configDiv = document.getElementById(`config-cuve-${ligneId}`);
@@ -844,7 +841,7 @@
         }
         
         let html = '<div class="card">';
-        let qte_a_produire = reste; // Par défaut, on utilise le reste de l'objectif
+        let qte_a_produire = reste;
         let limiteCuveActive = false;
 
         if (ligne === 'l60') {
@@ -855,57 +852,27 @@
             const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
             
-            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire (Objectif)</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
             
-            // === LOGIQUE CUVE ET AJUSTEMENT DES CONSOMMABLES ===
+            // === LOGIQUE CUVE ===
             const checkCuve = document.getElementById(`check-cuve-${ligne}`);
             if (checkCuve && checkCuve.checked) {
                 const poidsActuel = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
                 
                 if (poidsActuel > 50) {
                     const poidsUtilisable = poidsActuel - 50;
-                    const palettesPossibles = Math.floor(poidsUtilisable / config.colorant);
-                    const piecesPossibles = palettesPossibles * config.produitsParPalette;
+                    const piecesPossibles = Math.floor((poidsUtilisable / config.colorant) * config.produitsParPalette);
                     
-                    // Si la cuve limite la production, on ajuste la quantité pour les consommables
                     if (piecesPossibles < reste) {
                         qte_a_produire = piecesPossibles;
                         limiteCuveActive = true;
                     }
-
-                    const isSufficient = piecesPossibles >= reste;
-                    const borderColor = isSufficient ? '#2ecc71' : '#e74c3c';
-                    const bgColor = isSufficient ? '#eafaf1' : '#fdedec';
-                    const icon = isSufficient ? '✅' : '⚠️';
-                    const message = isSufficient ? "Suffisant pour atteindre votre objectif." : "La cuve sera épuisée AVANT la fin de l'objectif !";
-
-                    html += `
-                        <div class="resultat-section" style="border-left: 5px solid ${borderColor}; background: ${bgColor}; margin-top: 15px;">
-                            <div class="resultat-title">🧪 Limite de la cuve actuelle</div>
-                            <div class="resultat-highlight" style="color: ${borderColor}; font-size: 32px; margin: 10px 0;">
-                                ${piecesPossibles.toLocaleString()} pièces
-                            </div>
-                            <div style="font-size: 14px; color: #555;">
-                                C'est le nombre maximum de pièces que vous pouvez produire avant d'atteindre les 50 kg minimum.
-                            </div>
-                            <div style="font-size: 15px; font-weight: bold; margin-top: 10px; color: ${borderColor};">
-                                ${icon} ${message}
-                            </div>
-                        </div>
-                    `;
                 } else if (poidsActuel > 0 && poidsActuel <= 50) {
-                    html += `
-                        <div class="resultat-section" style="border-left: 5px solid #e74c3c; background: #fdedec; margin-top: 15px;">
-                            <div class="resultat-title">🧪 Limite de la cuve actuelle</div>
-                            <div class="resultat-highlight" style="color: #e74c3c; font-size: 32px; margin: 10px 0;">0 pièce</div>
-                            <div style="font-size: 14px; color: #555; font-weight: bold;">
-                                ⚠️ Le poids est déjà inférieur ou égal à 50 kg. La cuve doit être changée immédiatement.
-                            </div>
-                        </div>
-                    `;
+                    qte_a_produire = 0;
+                    limiteCuveActive = true;
                 }
             }
-            // ==========================================================
+            // ===================
 
             if (posteActuel === 'arriere') {
                 const tubesLaminesParBoite = 252;
@@ -915,11 +882,11 @@
                 const nbBoitesPlast = Math.ceil(qte_a_produire / tubesPlastiqueParBoite);
                 const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
                 
-                let titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Tubes laminés (252/boîte)";
-                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
+                const couleurLam = limiteCuveActive ? '#e74c3c' : '#1a1a1a';
+                const couleurPlast = limiteCuveActive ? '#e74c3c' : '#1a1a1a';
                 
-                titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Tubes plastique (690/boîte)";
-                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité : ${capacitePlast.toLocaleString()} tubes</div></div>`;
+                html += `<div class="resultat-section"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight" style="color: ${couleurLam};">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
+                html += `<div class="resultat-section"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight" style="color: ${couleurPlast};">${nbBoitesPlast} boîtes</div><div>Capacité : ${capacitePlast.toLocaleString()} tubes</div></div>`;
             } else {
                 const noticesParPaquet = 1200;
                 const nbPaquetsNotices = Math.ceil(qte_a_produire / noticesParPaquet);
@@ -928,15 +895,19 @@
                 const nbBoitesEtuis = Math.ceil(qte_a_produire / etuisParBoite);
                 const capaciteEtuis = nbBoitesEtuis * etuisParBoite;
                 
-                let titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Paquets de notices (1 200/paquet)";
-                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div><div>Capacité : ${capaciteNotices.toLocaleString()} notices</div></div>`;
+                const couleurNotices = limiteCuveActive ? '#e74c3c' : '#1a1a1a';
+                const couleurEtuis = limiteCuveActive ? '#e74c3c' : '#1a1a1a';
                 
-                titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Boîtes d'étuis (230/boîte)";
-                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesEtuis} boîtes</div><div>Capacité : ${capaciteEtuis.toLocaleString()} étuis</div></div>`;
+                html += `<div class="resultat-section"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight" style="color: ${couleurNotices};">${nbPaquetsNotices} paquets</div><div>Capacité : ${capaciteNotices.toLocaleString()} notices</div></div>`;
+                html += `<div class="resultat-section"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight" style="color: ${couleurEtuis};">${nbBoitesEtuis} boîtes</div><div>Capacité : ${capaciteEtuis.toLocaleString()} étuis</div></div>`;
             }
             
             html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
-            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire (pour l\'objectif)</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+            
+            if (limiteCuveActive) {
+                html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantité limitée par la cuve</div>';
+            }
             
             html += '</div>';
             resDiv.innerHTML = html;
