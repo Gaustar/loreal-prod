@@ -843,6 +843,7 @@
         let html = '<div class="card">';
         let qte_a_produire = reste;
         let limiteCuveActive = false;
+        let piecesPossiblesCuve = 0;
 
         if (ligne === 'l60') {
             const config = LIGNES.l60;
@@ -852,7 +853,7 @@
             const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
             
-            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire (Objectif)</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
             
             // === LOGIQUE CUVE ===
             const checkCuve = document.getElementById(`check-cuve-${ligne}`);
@@ -861,18 +862,32 @@
                 
                 if (poidsActuel > 50) {
                     const poidsUtilisable = poidsActuel - 50;
-                    const piecesPossibles = Math.floor((poidsUtilisable / config.colorant) * config.produitsParPalette);
+                    piecesPossiblesCuve = Math.floor((poidsUtilisable / config.colorant) * config.produitsParPalette);
                     
-                    if (piecesPossibles < reste) {
-                        qte_a_produire = piecesPossibles;
+                    if (piecesPossiblesCuve < reste) {
+                        qte_a_produire = piecesPossiblesCuve;
                         limiteCuveActive = true;
                     }
                 } else if (poidsActuel > 0 && poidsActuel <= 50) {
+                    piecesPossiblesCuve = 0;
                     qte_a_produire = 0;
                     limiteCuveActive = true;
                 }
             }
             // ===================
+
+            // Affichage de la limite si elle est active
+            if (limiteCuveActive) {
+                html += `
+                    <div class="resultat-section" style="border-left-color: #e74c3c; background: #fff5f5; margin-top: 15px;">
+                        <div class="resultat-title" style="color: #e74c3c;">⛔ Maximum possible avec la cuve actuelle</div>
+                        <div class="resultat-highlight" style="color: #e74c3c; font-size: 32px;">${piecesPossiblesCuve.toLocaleString()} pièces</div>
+                        <div style="font-size: 13px; color: #c0392b; margin-top: 5px; font-weight: bold;">
+                            (Soit ${reste - piecesPossiblesCuve} pièces de moins que l'objectif)
+                        </div>
+                    </div>
+                `;
+            }
 
             if (posteActuel === 'arriere') {
                 const tubesLaminesParBoite = 252;
@@ -903,10 +918,10 @@
             }
             
             html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
-            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire (pour l\'objectif)</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
             
             if (limiteCuveActive) {
-                html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantité limitée par la cuve</div>';
+                html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantités de consommables limitées par la cuve</div>';
             }
             
             html += '</div>';
