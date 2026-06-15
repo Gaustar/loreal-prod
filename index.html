@@ -251,7 +251,7 @@
             text-align: center;
         }
         
-        /* NOUVEAU STYLE POUR LE TIMER SHIFT */
+        /* TIMER SHIFT */
         .shift-modal-box {
             background: linear-gradient(145deg, #1e2a2a 0%, #0f1a1a 100%);
             color: #e8e8e8;
@@ -453,7 +453,7 @@
     </div>
 </div>
 
-<!-- Modal Timer de Shift (style refait) -->
+<!-- Modal Timer de Shift -->
 <div class="modal-overlay" id="modal-shift">
     <div class="shift-modal-box">
         <div class="shift-selector">
@@ -577,9 +577,9 @@
                 ${config.colorant ? `
                 <div class="form-group" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
                     <label class="repas-toggle" style="justify-content: flex-start; cursor: pointer;">
-                        <input type="checkbox" id="check-cuve-${ligneId}" onchange="calculer('${ligneId}')">
+                        <input type="checkbox" id="check-cuve-${ligneId}" onchange="toggleCuveUI('${ligneId}')">
                         <div class="repas-switch"></div>
-                        <span style="font-weight: 600; color: #333; font-size: 14px;">🧪 Vérifier limite cuve (min. 50kg)</span>
+                        <span style="font-weight: 600; color: #333; font-size: 14px;">🧪 Suivre la cuve (min. 50kg)</span>
                     </label>
                     <div id="config-cuve-${ligneId}" class="repas-config" style="margin-top: 10px;">
                         <label class="form-label">Poids actuel dans la cuve (kg) :</label>
@@ -673,7 +673,10 @@
     // ========== SAUVEGARDE / CHARGEMENT ==========
     function sauvegarderValeur(ligne, champ, valeur) { storageSet(ligne + '-' + champ, valeur); }
     function chargerValeur(ligne, champ, def) { return storageGet(ligne + '-' + champ, def); }
-    function effacerSauvegardeLigne(ligne) { storageRemove(ligne + '-total'); storageRemove(ligne + '-fait'); }
+    function effacerSauvegardeLigne(ligne) { 
+        storageRemove(ligne + '-total'); 
+        storageRemove(ligne + '-fait'); 
+    }
 
     function chargerToutesLesDonnees() {
         Object.keys(LIGNES).forEach(ligne => {
@@ -728,6 +731,20 @@
         if (nouvelleValeur < 0) nouvelleValeur = 0;
         faitInput.value = nouvelleValeur;
         sauvegarderValeur(ligne, 'fait', faitInput.value);
+
+        // CORRECTION : Mise à jour automatique du poids de la cuve (le poids DIMINUE quand on ajoute une palette)
+        if (ligne === 'l60') {
+            const poidsInput = document.getElementById('poids-cuve-l60');
+            const checkCuve = document.getElementById('check-cuve-l60');
+            if (checkCuve && checkCuve.checked && poidsInput && poidsInput.value !== '') {
+                let poidsActuel = parseFloat(poidsInput.value) || 0;
+                // On SOUSTRAIT le poids d'une palette quand on en ajoute une (direction = 1)
+                let nouveauPoids = poidsActuel - (LIGNES.l60.colorant * direction);
+                if (nouveauPoids < 0) nouveauPoids = 0;
+                poidsInput.value = nouveauPoids;
+            }
+        }
+
         calculer(ligne);
     }
 
@@ -739,8 +756,35 @@
         if (fill) { fill.style.width = '0%'; fill.innerText = ''; }
         const txt = document.getElementById('progress-text-' + ligne);
         if (txt) txt.innerText = 'Progression: 0%';
+        
+        // Réinitialisation spécifique de la cuve
+        if (ligne === 'l60') {
+            const checkCuve = document.getElementById('check-cuve-l60');
+            const poidsInput = document.getElementById('poids-cuve-l60');
+            if (checkCuve) checkCuve.checked = false;
+            if (poidsInput) poidsInput.value = '';
+            toggleCuveUI(ligne); // Pour cacher le champ
+        }
+
         effacerSauvegardeLigne(ligne);
         calculer(ligne);
+    }
+
+    // Afficher/Masquer le champ de poids de la cuve
+    function toggleCuveUI(ligneId) {
+        const checkCuve = document.getElementById(`check-cuve-${ligneId}`);
+        const configDiv = document.getElementById(`config-cuve-${ligneId}`);
+        if (checkCuve && configDiv) {
+            if (checkCuve.checked) {
+                configDiv.classList.add('visible');
+                configDiv.style.display = 'block';
+            } else {
+                configDiv.classList.remove('visible');
+                configDiv.style.display = 'none';
+                document.getElementById(`poids-cuve-${ligneId}`).value = '';
+            }
+            calculer(ligneId);
+        }
     }
 
     function ouvrirAvis() { window.open('https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog', '_blank'); }
@@ -786,7 +830,8 @@
         }
         
         const resDiv = document.getElementById('resultat-' + ligne);
-        const reste = Math.max(0, total - fait);
+        let reste = Math.max(0, total - fait);
+        
         if (reste === 0) {
             resDiv.innerHTML = '<div class="card success">✅ PRODUCTION TERMINÉE</div>';
             return;
@@ -799,7 +844,9 @@
         }
         
         let html = '<div class="card">';
-        
+        let qte_a_produire = reste; // Par défaut, on utilise le reste de l'objectif
+        let limiteCuveActive = false;
+
         if (ligne === 'l60') {
             const config = LIGNES.l60;
             const minTotales = reste / config.vitesse;
@@ -808,40 +855,24 @@
             const fin = new Date(Date.now() + minTotales*60000).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
             const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
             
-            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
-            if (posteActuel === 'arriere') {
-                const tubesLaminesParBoite = 252;
-                const nbBoitesLam = Math.ceil(reste / tubesLaminesParBoite);
-                const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
-                const tubesPlastiqueParBoite = 690;
-                const nbBoitesPlast = Math.ceil(reste / tubesPlastiqueParBoite);
-                const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
-                html += '<div class="resultat-section"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight">' + nbBoitesLam + ' boîtes</div><div>Capacité : ' + capaciteLam.toLocaleString() + ' tubes</div></div>';
-                html += '<div class="resultat-section"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight">' + nbBoitesPlast + ' boîtes</div><div>Capacité : ' + capacitePlast.toLocaleString() + ' tubes</div></div>';
-            } else {
-                const noticesParPaquet = 1200;
-                const nbPaquetsNotices = Math.ceil(reste / noticesParPaquet);
-                const capaciteNotices = nbPaquetsNotices * noticesParPaquet;
-                const etuisParBoite = 230;
-                const nbBoitesEtuis = Math.ceil(reste / etuisParBoite);
-                const capaciteEtuis = nbBoitesEtuis * etuisParBoite;
-                html += '<div class="resultat-section"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight">' + nbPaquetsNotices + ' paquets</div><div>Capacité : ' + capaciteNotices.toLocaleString() + ' notices</div></div>';
-                html += '<div class="resultat-section"><div class="resultat-title">Boîtes d\'étuis (230/boîte)</div><div class="resultat-highlight">' + nbBoitesEtuis + ' boîtes</div><div>Capacité : ' + capaciteEtuis.toLocaleString() + ' étuis</div></div>';
-            }
-            html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
-            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Reste à produire (Objectif)</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
             
-            // === NOUVEAU : Calcul de la limite de cuve pour la L60 ===
+            // === LOGIQUE CUVE ET AJUSTEMENT DES CONSOMMABLES ===
             const checkCuve = document.getElementById(`check-cuve-${ligne}`);
             if (checkCuve && checkCuve.checked) {
                 const poidsActuel = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
-                const configDiv = document.getElementById(`config-cuve-${ligne}`);
-                if(configDiv) configDiv.classList.toggle('visible', checkCuve.checked);
-
+                
                 if (poidsActuel > 50) {
                     const poidsUtilisable = poidsActuel - 50;
                     const palettesPossibles = Math.floor(poidsUtilisable / config.colorant);
                     const piecesPossibles = palettesPossibles * config.produitsParPalette;
+                    
+                    // Si la cuve limite la production, on ajuste la quantité pour les consommables
+                    if (piecesPossibles < reste) {
+                        qte_a_produire = piecesPossibles;
+                        limiteCuveActive = true;
+                    }
+
                     const isSufficient = piecesPossibles >= reste;
                     const borderColor = isSufficient ? '#2ecc71' : '#e74c3c';
                     const bgColor = isSufficient ? '#eafaf1' : '#fdedec';
@@ -875,12 +906,44 @@
                 }
             }
             // ==========================================================
+
+            if (posteActuel === 'arriere') {
+                const tubesLaminesParBoite = 252;
+                const nbBoitesLam = Math.ceil(qte_a_produire / tubesLaminesParBoite);
+                const capaciteLam = nbBoitesLam * tubesLaminesParBoite;
+                const tubesPlastiqueParBoite = 690;
+                const nbBoitesPlast = Math.ceil(qte_a_produire / tubesPlastiqueParBoite);
+                const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
+                
+                let titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Tubes laminés (252/boîte)";
+                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
+                
+                titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Tubes plastique (690/boîte)";
+                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesPlast} boîtes</div><div>Capacité : ${capacitePlast.toLocaleString()} tubes</div></div>`;
+            } else {
+                const noticesParPaquet = 1200;
+                const nbPaquetsNotices = Math.ceil(qte_a_produire / noticesParPaquet);
+                const capaciteNotices = nbPaquetsNotices * noticesParPaquet;
+                const etuisParBoite = 230;
+                const nbBoitesEtuis = Math.ceil(qte_a_produire / etuisParBoite);
+                const capaciteEtuis = nbBoitesEtuis * etuisParBoite;
+                
+                let titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Paquets de notices (1 200/paquet)";
+                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbPaquetsNotices} paquets</div><div>Capacité : ${capaciteNotices.toLocaleString()} notices</div></div>`;
+                
+                titreAppro = limiteCuveActive ? "⚠️ Approvisionnement (Limité par la cuve)" : "Boîtes d'étuis (230/boîte)";
+                html += `<div class="resultat-section"><div class="resultat-title">${titreAppro}</div><div class="resultat-highlight">${nbBoitesEtuis} boîtes</div><div>Capacité : ${capaciteEtuis.toLocaleString()} étuis</div></div>`;
+            }
+            
+            html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
+            html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire (pour l\'objectif)</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
             
             html += '</div>';
             resDiv.innerHTML = html;
             return;
         }
         
+        // Calcul standard pour les autres lignes (L70, L74, L87)
         const config = LIGNES[ligne];
         const pal = Math.floor(reste / config.produitsParPalette);
         const resteP = reste % config.produitsParPalette;
@@ -899,7 +962,7 @@
         resDiv.innerHTML = html;
     }
 
-    // ========== TIMER SHIFT AMÉLIORÉ ==========
+    // ========== TIMER SHIFT ==========
     let shiftInterval = null;
     let shiftActuel = 'matin';
     const SHIFTS = {
@@ -913,27 +976,15 @@
         let end = new Date(now);
         end.setHours(SHIFTS[type].fin.h, SHIFTS[type].fin.m, 0, 0);
         
-        if (now < start) {
-            return { start, end, status: 'avant' };
-        }
+        if (now < start) return { start, end, status: 'avant' };
         if (now > end) {
-            if (type === 'matin') {
-                let nextStart = new Date(now);
-                nextStart.setDate(now.getDate() + 1);
-                nextStart.setHours(SHIFTS.matin.debut.h, SHIFTS.matin.debut.m, 0, 0);
-                let nextEnd = new Date(now);
-                nextEnd.setDate(now.getDate() + 1);
-                nextEnd.setHours(SHIFTS.matin.fin.h, SHIFTS.matin.fin.m, 0, 0);
-                return { start: nextStart, end: nextEnd, status: 'futur' };
-            } else {
-                let nextStart = new Date(now);
-                nextStart.setDate(now.getDate() + 1);
-                nextStart.setHours(SHIFTS.aprem.debut.h, SHIFTS.aprem.debut.m, 0, 0);
-                let nextEnd = new Date(now);
-                nextEnd.setDate(now.getDate() + 1);
-                nextEnd.setHours(SHIFTS.aprem.fin.h, SHIFTS.aprem.fin.m, 0, 0);
-                return { start: nextStart, end: nextEnd, status: 'futur' };
-            }
+            let nextStart = new Date(now);
+            nextStart.setDate(now.getDate() + 1);
+            nextStart.setHours(SHIFTS[type].debut.h, SHIFTS[type].debut.m, 0, 0);
+            let nextEnd = new Date(now);
+            nextEnd.setDate(now.getDate() + 1);
+            nextEnd.setHours(SHIFTS[type].fin.h, SHIFTS[type].fin.m, 0, 0);
+            return { start: nextStart, end: nextEnd, status: 'futur' };
         }
         return { start, end, status: 'pendant' };
     }
