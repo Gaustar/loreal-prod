@@ -1,8 +1,17 @@
-const CACHE_NAME = 'loreal-prod-v3';   // ← changez ce chiffre à chaque mise à jour
+const CACHE_NAME = 'loreal-prod-v4';   // ← changez ce chiffre à chaque mise à jour
 const urlsToCache = [
   '.',
   'index.html',
-  'manifest.json'
+  'manifest.json',
+  'css/style.css',
+  'js/config.js',
+  'js/storage.js',
+  'js/ui.js',
+  'js/cadence.js',
+  'js/poste.js',
+  'js/calcul-lignes.js',
+  'js/shift-timer.js',
+  'js/app.js'
 ];
 
 self.addEventListener('install', event => {
