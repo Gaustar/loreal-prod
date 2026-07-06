@@ -31,6 +31,10 @@
 <!-- Bouton flottant pour avis (bas droite) -->
 <div class="fab fab-avis" onclick="ouvrirAvis()">💬</div>
 
+<!-- Bouton flottant pour le contrôle qualité (bas centre) : affiche le décompte
+     de la ligne actuellement affichée, tap = valider le contrôle -->
+<div class="fab fab-controle" id="fab-controle" onclick="clicFabControle()">🕐</div>
+
 <!-- Modal Réglage Cadence -->
 <div class="modal-overlay" id="modal-cadence">
     <div class="modal-box">
@@ -44,6 +48,21 @@
             <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverCadence()">Valider</button>
         </div>
         <button class="modal-reset-btn" onclick="resetCadence()">Rétablir la valeur par défaut</button>
+    </div>
+</div>
+
+<!-- Modal Réglage Contrôle Qualité -->
+<div class="modal-overlay" id="modal-controle">
+    <div class="modal-box">
+        <h3 id="modal-controle-title">🕐 Contrôle qualité</h3>
+        <div class="form-group" style="margin-bottom: 15px;">
+            <label class="form-label">Heure du premier contrôle (répété toutes les heures) :</label>
+            <input type="time" id="input-controle-heure" class="form-input" style="font-size: 22px; text-align: center;">
+        </div>
+        <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
+            <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageControle()">Annuler</button>
+            <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverReglageControle()">Valider</button>
+        </div>
     </div>
 </div>
 
@@ -86,6 +105,7 @@
 <script src="js/poste.js"></script>
 <script src="js/calcul-lignes.js"></script>
 <script src="js/shift-timer.js"></script>
+<script src="js/controle-qualite.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
