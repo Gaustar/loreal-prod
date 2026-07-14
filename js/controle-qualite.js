@@ -78,6 +78,18 @@ function sauverReglageControle() {
     fermerReglageControle();
 }
 
+// Réinitialise (désactive) le contrôle qualité de la ligne réglée dans le
+// modal — utile quand on est au poste "arrière" et que ce n'est pas soi
+// qui réalise le contrôle qualité.
+function reinitialiserControle() {
+    if (!ligneEnCoursReglageControle) return;
+    const ligne = ligneEnCoursReglageControle;
+    storageRemove(`${ligne}-controle-heure`);
+    storageRemove(`${ligne}-controle-fait-periode`);
+    majFabControle();
+    fermerReglageControle();
+}
+
 function majFabControle() {
     const fab = document.getElementById('fab-controle');
     if (!fab) return;
@@ -103,19 +115,50 @@ function majFabControle() {
     fab.classList.toggle('fab-controle-fait', fait);
 }
 
-function clicFabControle() {
+// Valide le contrôle après un appui maintenu (évite la validation accidentelle
+// d'un simple tap). Un tap simple, lui, n'a aucun effet si un horaire est déjà
+// réglé — il ouvre les réglages seulement si aucun horaire n'est configuré.
+const DUREE_MAINTIEN_MS = 700;
+let maintienTimer = null;
+
+function demarrerMaintienFabControle(e) {
+    if (e.cancelable) e.preventDefault();
+    const fab = document.getElementById('fab-controle');
     const ligne = ligneActiveCourante || Object.keys(LIGNES)[0];
     const ref = getReferenceControle(ligne);
+
     if (!ref) {
         ouvrirReglageControle(ligne);
         return;
     }
-    validerControle(ligne);
-    afficherAlerteTemporaire('✅ Contrôle qualité validé — ' + LIGNES[ligne].nom);
+
+    fab.classList.add('fab-controle-maintien');
+    maintienTimer = setTimeout(() => {
+        validerControle(ligne);
+        afficherAlerteTemporaire('✅ Contrôle qualité validé — ' + LIGNES[ligne].nom);
+        if (navigator.vibrate) navigator.vibrate(40);
+        fab.classList.remove('fab-controle-maintien');
+    }, DUREE_MAINTIEN_MS);
+}
+
+function annulerMaintienFabControle() {
+    if (maintienTimer) { clearTimeout(maintienTimer); maintienTimer = null; }
+    const fab = document.getElementById('fab-controle');
+    if (fab) fab.classList.remove('fab-controle-maintien');
+}
+
+function attacherEvenementsFabControle() {
+    const fab = document.getElementById('fab-controle');
+    if (!fab) return;
+    fab.addEventListener('pointerdown', demarrerMaintienFabControle);
+    fab.addEventListener('pointerup', annulerMaintienFabControle);
+    fab.addEventListener('pointerleave', annulerMaintienFabControle);
+    fab.addEventListener('pointercancel', annulerMaintienFabControle);
 }
 
 function initControleQualite() {
     majFabControle();
+    attacherEvenementsFabControle();
     if (controleInterval) clearInterval(controleInterval);
     controleInterval = setInterval(majFabControle, 1000);
 }

@@ -55,4 +55,6 @@ const CONDITIONNEMENT_L60 = {
     avantAlt: { unite: "Boîtes d'étuis", parBoite: 230, labelBoite: 'boîtes', labelPiece: 'étuis' }
 };
 
-const CUVE_SEUIL_MIN_KG = 50;
+// Valeur de seuil cuve utilisée tant qu'aucune valeur personnalisée n'a
+// été réglée pour la ligne (voir getSeuilCuve dans calcul-lignes.js).
+const SEUIL_CUVE_DEFAUT = 50;

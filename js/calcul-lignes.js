@@ -8,6 +8,17 @@
 
 let alerteCorrigeeActive = false;
 
+// Seuil minimum de la cuve, personnalisable par ligne (au lieu d'une
+// constante unique). Retombe sur SEUIL_CUVE_DEFAUT tant que rien n'est réglé.
+function getSeuilCuve(ligne) {
+    const val = parseFloat(storageGet(`${ligne}-cuve-seuil`, SEUIL_CUVE_DEFAUT));
+    return isNaN(val) ? SEUIL_CUVE_DEFAUT : val;
+}
+
+function sauvegarderSeuilCuve(ligne, valeur) {
+    storageSet(`${ligne}-cuve-seuil`, valeur);
+}
+
 function calculer(ligne) {
     const totalInput = document.getElementById('total-' + ligne);
     const faitInput = document.getElementById('fait-' + ligne);
@@ -95,10 +106,6 @@ function calculerStandard(ligne, reste) {
 
 function calculerL60(ligne, reste) {
     const config = LIGNES.l60;
-    const minTotales = reste / config.vitesse;
-    const h = Math.floor(minTotales / 60);
-    const m = Math.floor(minTotales % 60);
-    const fin = new Date(Date.now() + minTotales * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
 
     let html = '<div class="card">';
@@ -108,20 +115,21 @@ function calculerL60(ligne, reste) {
     let qte_a_produire = reste;
     let limiteCuveActive = false;
     let piecesPossiblesCuve = 0;
+    const seuil = getSeuilCuve(ligne);
 
     const checkCuve = document.getElementById(`check-cuve-${ligne}`);
     if (checkCuve && checkCuve.checked) {
         const poidsActuel = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
 
-        if (poidsActuel > CUVE_SEUIL_MIN_KG) {
-            const poidsUtilisable = poidsActuel - CUVE_SEUIL_MIN_KG;
+        if (poidsActuel > seuil) {
+            const poidsUtilisable = poidsActuel - seuil;
             piecesPossiblesCuve = Math.floor((poidsUtilisable / config.colorant) * config.produitsParPalette);
 
             if (piecesPossiblesCuve < reste) {
                 qte_a_produire = piecesPossiblesCuve;
                 limiteCuveActive = true;
             }
-        } else if (poidsActuel > 0 && poidsActuel <= CUVE_SEUIL_MIN_KG) {
+        } else if (poidsActuel > 0 && poidsActuel <= seuil) {
             piecesPossiblesCuve = 0;
             qte_a_produire = 0;
             limiteCuveActive = true;
@@ -164,11 +172,18 @@ function calculerL60(ligne, reste) {
         html += `<div class="resultat-section"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight" style="color: ${couleur};">${nbBoitesEtuis} boîtes</div><div>Capacité : ${capaciteEtuis.toLocaleString()} étuis</div></div>`;
     }
 
-    html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
+    // Le temps restant suit désormais la quantité réellement productible
+    // (limitée par la cuve le cas échéant), pas l'objectif complet.
+    const minTotales = qte_a_produire / config.vitesse;
+    const h = Math.floor(minTotales / 60);
+    const m = Math.floor(minTotales % 60);
+    const fin = new Date(Date.now() + minTotales * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    html += '<div class="resultat-section"><div class="resultat-title">Temps restant' + (limiteCuveActive ? ' (limité par la cuve)' : '') + '</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
     html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire (pour l\'objectif)</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
 
     if (limiteCuveActive) {
-        html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantités de consommables limitées par la cuve</div>';
+        html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantités et temps limités par la cuve</div>';
     }
 
     html += '</div>';
@@ -204,12 +219,13 @@ function modifierPalette(ligne, direction) {
     sauvegarderValeur(ligne, 'fait', faitInput.value);
 
     // Mise à jour automatique du poids de la cuve (le poids DIMINUE quand on ajoute une palette)
-    if (ligne === 'l60') {
-        const poidsInput = document.getElementById('poids-cuve-l60');
-        const checkCuve = document.getElementById('check-cuve-l60');
+    // Générique : s'applique à toute ligne ayant un colorant configuré, pas seulement l60.
+    if (LIGNES[ligne].colorant) {
+        const poidsInput = document.getElementById(`poids-cuve-${ligne}`);
+        const checkCuve = document.getElementById(`check-cuve-${ligne}`);
         if (checkCuve && checkCuve.checked && poidsInput && poidsInput.value !== '') {
             let poidsActuel = parseFloat(poidsInput.value) || 0;
-            let nouveauPoids = poidsActuel - (LIGNES.l60.colorant * direction);
+            let nouveauPoids = poidsActuel - (LIGNES[ligne].colorant * direction);
             if (nouveauPoids < 0) nouveauPoids = 0;
             poidsInput.value = nouveauPoids;
             sauvegarderPoidsCuve(ligne, nouveauPoids);
@@ -228,9 +244,9 @@ function reinitialiser(ligne) {
     const txt = document.getElementById('progress-text-' + ligne);
     if (txt) txt.innerText = 'Progression: 0%';
 
-    if (ligne === 'l60') {
-        const checkCuve = document.getElementById('check-cuve-l60');
-        const poidsInput = document.getElementById('poids-cuve-l60');
+    if (LIGNES[ligne].colorant) {
+        const checkCuve = document.getElementById(`check-cuve-${ligne}`);
+        const poidsInput = document.getElementById(`poids-cuve-${ligne}`);
         if (checkCuve) checkCuve.checked = false;
         if (poidsInput) poidsInput.value = '';
         toggleCuveUI(ligne);

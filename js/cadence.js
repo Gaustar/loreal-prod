@@ -12,6 +12,15 @@ function ouvrirReglageCadence(ligne) {
     ligneEnCoursReglage = ligne;
     document.getElementById('modal-cadence-title').innerText = '🔩 Ligne ' + LIGNES[ligne].nom;
     document.getElementById('input-cadence').value = LIGNES[ligne].vitesse;
+
+    const groupeSeuil = document.getElementById('groupe-seuil-cuve');
+    if (LIGNES[ligne].colorant) {
+        groupeSeuil.style.display = 'block';
+        document.getElementById('input-seuil-cuve').value = getSeuilCuve(ligne);
+    } else {
+        groupeSeuil.style.display = 'none';
+    }
+
     document.getElementById('modal-cadence').classList.add('active');
     setTimeout(() => document.getElementById('input-cadence').select(), 100);
 }
@@ -27,8 +36,14 @@ function sauverCadence() {
     if (val > 0) {
         LIGNES[ligneEnCoursReglage].vitesse = val;
         storageSet('cadence-' + ligneEnCoursReglage, val);
-        calculer(ligneEnCoursReglage);
     }
+    if (LIGNES[ligneEnCoursReglage].colorant) {
+        const seuilVal = parseFloat(document.getElementById('input-seuil-cuve').value);
+        if (!isNaN(seuilVal) && seuilVal >= 0) {
+            sauvegarderSeuilCuve(ligneEnCoursReglage, seuilVal);
+        }
+    }
+    calculer(ligneEnCoursReglage);
     fermerReglageCadence();
 }
 

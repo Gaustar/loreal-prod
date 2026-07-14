@@ -6,12 +6,14 @@ function genererTabsEtContenus() {
     tabsContainer.innerHTML = '';
     contentsContainer.innerHTML = '';
 
-    ligneActiveCourante = Object.keys(LIGNES)[0];
+    const dernierOnglet = storageGet('dernier-onglet', null);
+    ligneActiveCourante = (dernierOnglet && LIGNES[dernierOnglet]) ? dernierOnglet : Object.keys(LIGNES)[0];
 
     Object.keys(LIGNES).forEach((ligneId, index) => {
+        const estActive = ligneId === ligneActiveCourante;
         const tabBtn = document.createElement('button');
         tabBtn.className = `tab ${ligneId}`;
-        if (index === 0) tabBtn.classList.add('active');
+        if (estActive) tabBtn.classList.add('active');
         tabBtn.textContent = LIGNES[ligneId].nom;
         tabBtn.onclick = () => switchTab(ligneId);
         tabsContainer.appendChild(tabBtn);
@@ -19,7 +21,7 @@ function genererTabsEtContenus() {
         const contentDiv = document.createElement('div');
         contentDiv.id = ligneId;
         contentDiv.className = 'content';
-        if (index === 0) contentDiv.classList.add('active');
+        if (estActive) contentDiv.classList.add('active');
         contentDiv.innerHTML = genererHTMLLigne(ligneId);
         contentsContainer.appendChild(contentDiv);
     });
@@ -92,6 +94,7 @@ function switchTab(ligneId) {
     document.querySelector(`.tab.${ligneId}`).classList.add('active');
     document.getElementById(ligneId).classList.add('active');
     ligneActiveCourante = ligneId;
+    storageSet('dernier-onglet', ligneId);
     if (typeof majFabControle === 'function') majFabControle();
 }
 
