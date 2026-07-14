@@ -33,7 +33,7 @@
 
 <!-- Bouton flottant pour le contrôle qualité (bas centre) : affiche le décompte
      de la ligne actuellement affichée, tap = valider le contrôle -->
-<div class="fab fab-controle" id="fab-controle" onclick="clicFabControle()">🕐</div>
+<div class="fab fab-controle" id="fab-controle">🕐</div>
 
 <!-- Modal Réglage Cadence -->
 <div class="modal-overlay" id="modal-cadence">
@@ -42,6 +42,10 @@
         <div class="form-group" style="margin-bottom: 15px;">
             <label class="form-label">Pièces par minute :</label>
             <input type="number" id="input-cadence" class="form-input" style="font-size: 24px; text-align: center;" min="1" step="1">
+        </div>
+        <div class="form-group" id="groupe-seuil-cuve" style="margin-bottom: 15px; display: none;">
+            <label class="form-label">Seuil minimum cuve (kg) :</label>
+            <input type="number" id="input-seuil-cuve" class="form-input" style="font-size: 20px; text-align: center;" min="0" step="1">
         </div>
         <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
             <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageCadence()">Annuler</button>
@@ -63,6 +67,7 @@
             <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageControle()">Annuler</button>
             <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverReglageControle()">Valider</button>
         </div>
+        <button class="modal-reset-btn" onclick="reinitialiserControle()">Réinitialiser (désactiver le contrôle)</button>
     </div>
 </div>
 
