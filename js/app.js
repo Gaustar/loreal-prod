@@ -30,14 +30,11 @@ function init() {
         calculer(ligne);
     });
 
-    document.getElementById('modal-cadence').addEventListener('click', (e) => {
-        if (e.target.id === 'modal-cadence') fermerReglageCadence();
+    document.getElementById('modal-reglages').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-reglages') fermerReglagesLigne();
     });
     document.getElementById('modal-shift').addEventListener('click', (e) => {
         if (e.target.id === 'modal-shift') fermerTimerShift();
-    });
-    document.getElementById('modal-controle').addEventListener('click', (e) => {
-        if (e.target.id === 'modal-controle') fermerReglageControle();
     });
 
     if ('serviceWorker' in navigator) {

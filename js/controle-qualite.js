@@ -4,12 +4,12 @@
 // → contrôles dus à 8h, 9h, 10h...).
 // Le bouton flottant "fab-controle" affiche toujours le décompte de la
 // ligne actuellement affichée (onglet actif, voir ligneActiveCourante
-// dans ui.js) et sert aussi à valider le contrôle d'un tap.
+// dans ui.js). Le réglage de l'heure et sa désactivation se font depuis
+// le menu ⚙️ Réglages (voir js/reglages.js).
 // Si l'heure passe sans validation, le décompte repart simplement pour
 // l'échéance suivante (pas d'alerte bloquante).
 
 let controleInterval = null;
-let ligneEnCoursReglageControle = null;
 
 function getReferenceControle(ligne) {
     const val = storageGet(`${ligne}-controle-heure`, null);
@@ -54,42 +54,6 @@ function validerControle(ligne) {
     majFabControle();
 }
 
-function ouvrirReglageControle(ligne) {
-    ligneEnCoursReglageControle = ligne;
-    const ref = getReferenceControle(ligne);
-    document.getElementById('modal-controle-title').innerText = '🕐 Contrôle qualité — ' + LIGNES[ligne].nom;
-    document.getElementById('input-controle-heure').value =
-        ref ? `${String(ref.h).padStart(2, '0')}:${String(ref.m).padStart(2, '0')}` : '';
-    document.getElementById('modal-controle').classList.add('active');
-}
-
-function fermerReglageControle() {
-    document.getElementById('modal-controle').classList.remove('active');
-    ligneEnCoursReglageControle = null;
-}
-
-function sauverReglageControle() {
-    if (!ligneEnCoursReglageControle) return;
-    const val = document.getElementById('input-controle-heure').value;
-    if (val) {
-        sauverHeureControle(ligneEnCoursReglageControle, val);
-        majFabControle();
-    }
-    fermerReglageControle();
-}
-
-// Réinitialise (désactive) le contrôle qualité de la ligne réglée dans le
-// modal — utile quand on est au poste "arrière" et que ce n'est pas soi
-// qui réalise le contrôle qualité.
-function reinitialiserControle() {
-    if (!ligneEnCoursReglageControle) return;
-    const ligne = ligneEnCoursReglageControle;
-    storageRemove(`${ligne}-controle-heure`);
-    storageRemove(`${ligne}-controle-fait-periode`);
-    majFabControle();
-    fermerReglageControle();
-}
-
 function majFabControle() {
     const fab = document.getElementById('fab-controle');
     if (!fab) return;
@@ -117,7 +81,7 @@ function majFabControle() {
 
 // Valide le contrôle après un appui maintenu (évite la validation accidentelle
 // d'un simple tap). Un tap simple, lui, n'a aucun effet si un horaire est déjà
-// réglé — il ouvre les réglages seulement si aucun horaire n'est configuré.
+// réglé — il ouvre le menu réglages seulement si aucun horaire n'est configuré.
 const DUREE_MAINTIEN_MS = 700;
 let maintienTimer = null;
 
@@ -128,7 +92,7 @@ function demarrerMaintienFabControle(e) {
     const ref = getReferenceControle(ligne);
 
     if (!ref) {
-        ouvrirReglageControle(ligne);
+        ouvrirReglagesLigne(ligne);
         return;
     }
 

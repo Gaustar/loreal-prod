@@ -78,25 +78,111 @@ function calculer(ligne) {
     resDiv.innerHTML = strategie(ligne, reste);
 }
 
+// ========== RENDU PARTAGÉ DES RÉSULTATS ==========
+// Utilisé par toutes les stratégies pour garder un affichage cohérent :
+// - un duo "Reste / Temps restant" en tête, même poids visuel, lecture rapide
+// - une checklist "À prévoir" pour les consommables, plutôt que des gros
+//   blocs répétés qui écrasaient tous la même importance visuelle.
+
+function renderEnTete(reste, h, m, fin, limite) {
+    return `
+        <div class="resultat-grid">
+            <div class="resultat-mini">
+                <div class="resultat-mini-label">🎯 Reste</div>
+                <div class="resultat-mini-valeur">${reste.toLocaleString()}</div>
+                <div class="resultat-mini-unite">pièces</div>
+            </div>
+            <div class="resultat-mini">
+                <div class="resultat-mini-label">⏱ Temps restant${limite ? ' *' : ''}</div>
+                <div class="resultat-mini-valeur">${h}h${String(m).padStart(2, '0')}</div>
+                <div class="resultat-mini-unite">fin ${fin}</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderAPrevoir(items) {
+    let html = '<div class="apprevoir"><div class="apprevoir-titre">🧰 À prévoir</div>';
+    items.forEach(it => {
+        html += `
+            <div class="apprevoir-ligne">
+                <span class="apprevoir-icone">${it.icone}</span>
+                <span class="apprevoir-label">${it.label}</span>
+                <span class="apprevoir-valeur" style="${it.couleur ? 'color:' + it.couleur + ';' : ''}">${it.valeur}</span>
+            </div>`;
+        if (it.detail) html += `<div class="apprevoir-detail">${it.detail}</div>`;
+    });
+    html += '</div>';
+    return html;
+}
+
 // ========== STRATÉGIE STANDARD (L70, L74, L87) ==========
 
 function calculerStandard(ligne, reste) {
     const config = LIGNES[ligne];
-    const pal = Math.floor(reste / config.produitsParPalette);
-    const resteP = reste % config.produitsParPalette;
+
+    // Cuve : seules les lignes avec un colorant configuré passent par la
+    // limitation (aucune pour l'instant à part l60, mais générique et prêt).
+    let qte_a_produire = reste;
+    let limiteCuveActive = false;
+    let piecesPossiblesCuve = 0;
+    let cuveHtml = '';
+
+    if (config.colorant) {
+        const seuil = getSeuilCuve(ligne);
+        const checkCuve = document.getElementById(`check-cuve-${ligne}`);
+        if (checkCuve && checkCuve.checked) {
+            const poidsActuel = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
+            if (poidsActuel > seuil) {
+                const poidsUtilisable = poidsActuel - seuil;
+                piecesPossiblesCuve = Math.floor((poidsUtilisable / config.colorant) * config.produitsParPalette);
+                if (piecesPossiblesCuve < reste) {
+                    qte_a_produire = piecesPossiblesCuve;
+                    limiteCuveActive = true;
+                }
+            } else if (poidsActuel > 0 && poidsActuel <= seuil) {
+                piecesPossiblesCuve = 0;
+                qte_a_produire = 0;
+                limiteCuveActive = true;
+            }
+        }
+        if (limiteCuveActive) {
+            cuveHtml = `
+                <div class="resultat-section" style="border-left-color: #e74c3c; background: #fff5f5; margin-bottom: 15px;">
+                    <div class="resultat-title" style="color: #e74c3c;">⛔ Maximum possible avec la cuve actuelle</div>
+                    <div class="resultat-highlight" style="color: #e74c3c; font-size: 32px;">${piecesPossiblesCuve.toLocaleString()} pièces</div>
+                    <div style="font-size: 13px; color: #c0392b; margin-top: 5px; font-weight: bold;">
+                        (Soit ${reste - piecesPossiblesCuve} pièces de moins que l'objectif)
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    const couleur = limiteCuveActive ? '#e74c3c' : null;
+    const pal = Math.floor(qte_a_produire / config.produitsParPalette);
+    const resteP = qte_a_produire % config.produitsParPalette;
     const niv = Math.floor(resteP / config.produitsParNiveau);
     const boit = Math.ceil((resteP % config.produitsParNiveau) / config.produitsParBoite);
-    const minTot = reste / config.vitesse;
+    const minTot = qte_a_produire / config.vitesse;
     const hh = Math.floor(minTot / 60);
     const mm = Math.floor(minTot % 60);
     const finH = new Date(Date.now() + minTot * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    let html = '<div class="card">';
-    html += '<div class="resultat-section"><div class="resultat-title">Reste à produire</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pces</div></div>';
-    html += '<div class="resultat-section"><div class="resultat-title">Conditionnement</div><div>• ' + pal + ' palettes complètes<br>• ' + niv + ' niveaux + ' + boit + ' boîtes</div></div>';
-    html += '<div class="resultat-section"><div class="resultat-title">Temps restant</div><div class="resultat-highlight">' + hh + 'h ' + mm + 'min</div><div>Fin estimée : ' + finH + '</div></div>';
+    const items = [
+        { icone: '📦', label: 'Palettes complètes', valeur: pal + ' palettes', couleur },
+        { icone: '📐', label: 'Niveaux + boîtes', valeur: niv + ' niv. + ' + boit + ' boîtes', couleur }
+    ];
     if (config.colorant) {
-        html += '<div class="resultat-section"><div class="resultat-title">Colorant</div><div>' + ((reste / config.produitsParPalette) * config.colorant).toFixed(1) + ' kg</div></div>';
+        items.push({ icone: '🎨', label: 'Colorant (objectif)', valeur: ((reste / config.produitsParPalette) * config.colorant).toFixed(1) + ' kg' });
+    }
+
+    let html = '<div class="card">';
+    html += renderEnTete(reste, hh, mm, finH, limiteCuveActive);
+    html += cuveHtml;
+    html += renderAPrevoir(items);
+    if (limiteCuveActive) {
+        html += '<div style="margin-top: 12px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 12px; color: #856404; font-weight: bold;">* Temps et quantités limités par la cuve</div>';
     }
     html += '</div>';
     return html;
@@ -106,16 +192,14 @@ function calculerStandard(ligne, reste) {
 
 function calculerL60(ligne, reste) {
     const config = LIGNES.l60;
-    const colorant = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
-
-    let html = '<div class="card">';
-    html += '<div class="resultat-section"><div class="resultat-title">Reste à produire (Objectif)</div><div class="resultat-highlight">' + reste.toLocaleString() + ' pièces</div></div>';
+    const colorantObjectif = ((reste / config.produitsParPalette) * config.colorant).toFixed(1);
 
     // === LOGIQUE CUVE ===
     let qte_a_produire = reste;
     let limiteCuveActive = false;
     let piecesPossiblesCuve = 0;
     const seuil = getSeuilCuve(ligne);
+    let cuveHtml = '';
 
     const checkCuve = document.getElementById(`check-cuve-${ligne}`);
     if (checkCuve && checkCuve.checked) {
@@ -137,8 +221,8 @@ function calculerL60(ligne, reste) {
     }
 
     if (limiteCuveActive) {
-        html += `
-            <div class="resultat-section" style="border-left-color: #e74c3c; background: #fff5f5; margin-top: 15px;">
+        cuveHtml = `
+            <div class="resultat-section" style="border-left-color: #e74c3c; background: #fff5f5; margin-bottom: 15px;">
                 <div class="resultat-title" style="color: #e74c3c;">⛔ Maximum possible avec la cuve actuelle</div>
                 <div class="resultat-highlight" style="color: #e74c3c; font-size: 32px;">${piecesPossiblesCuve.toLocaleString()} pièces</div>
                 <div style="font-size: 13px; color: #c0392b; margin-top: 5px; font-weight: bold;">
@@ -148,7 +232,8 @@ function calculerL60(ligne, reste) {
         `;
     }
 
-    const couleur = limiteCuveActive ? '#e74c3c' : '#1a1a1a';
+    const couleur = limiteCuveActive ? '#e74c3c' : null;
+    const items = [];
 
     if (posteActuel === 'arriere') {
         const tubesLaminesParBoite = 252;
@@ -158,8 +243,8 @@ function calculerL60(ligne, reste) {
         const nbBoitesPlast = Math.ceil(qte_a_produire / tubesPlastiqueParBoite);
         const capacitePlast = nbBoitesPlast * tubesPlastiqueParBoite;
 
-        html += `<div class="resultat-section"><div class="resultat-title">Tubes laminés (252/boîte)</div><div class="resultat-highlight" style="color: ${couleur};">${nbBoitesLam} boîtes</div><div>Capacité : ${capaciteLam.toLocaleString()} tubes</div></div>`;
-        html += `<div class="resultat-section"><div class="resultat-title">Tubes plastique (690/boîte)</div><div class="resultat-highlight" style="color: ${couleur};">${nbBoitesPlast} boîtes</div><div>Capacité : ${capacitePlast.toLocaleString()} tubes</div></div>`;
+        items.push({ icone: '🧴', label: 'Tubes laminés (252/boîte)', valeur: nbBoitesLam + ' boîtes', detail: capaciteLam.toLocaleString() + ' tubes', couleur });
+        items.push({ icone: '🧴', label: 'Tubes plastique (690/boîte)', valeur: nbBoitesPlast + ' boîtes', detail: capacitePlast.toLocaleString() + ' tubes', couleur });
     } else {
         const noticesParPaquet = 1200;
         const nbPaquetsNotices = Math.ceil(qte_a_produire / noticesParPaquet);
@@ -168,24 +253,25 @@ function calculerL60(ligne, reste) {
         const nbBoitesEtuis = Math.ceil(qte_a_produire / etuisParBoite);
         const capaciteEtuis = nbBoitesEtuis * etuisParBoite;
 
-        html += `<div class="resultat-section"><div class="resultat-title">Paquets de notices (1 200/paquet)</div><div class="resultat-highlight" style="color: ${couleur};">${nbPaquetsNotices} paquets</div><div>Capacité : ${capaciteNotices.toLocaleString()} notices</div></div>`;
-        html += `<div class="resultat-section"><div class="resultat-title">Boîtes d'étuis (230/boîte)</div><div class="resultat-highlight" style="color: ${couleur};">${nbBoitesEtuis} boîtes</div><div>Capacité : ${capaciteEtuis.toLocaleString()} étuis</div></div>`;
+        items.push({ icone: '📄', label: 'Paquets de notices (1 200/paquet)', valeur: nbPaquetsNotices + ' paquets', detail: capaciteNotices.toLocaleString() + ' notices', couleur });
+        items.push({ icone: '📦', label: "Boîtes d'étuis (230/boîte)", valeur: nbBoitesEtuis + ' boîtes', detail: capaciteEtuis.toLocaleString() + ' étuis', couleur });
     }
+    items.push({ icone: '🎨', label: 'Colorant (objectif)', valeur: colorantObjectif + ' kg' });
 
-    // Le temps restant suit désormais la quantité réellement productible
+    // Le temps restant suit la quantité réellement productible
     // (limitée par la cuve le cas échéant), pas l'objectif complet.
     const minTotales = qte_a_produire / config.vitesse;
     const h = Math.floor(minTotales / 60);
     const m = Math.floor(minTotales % 60);
     const fin = new Date(Date.now() + minTotales * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    html += '<div class="resultat-section"><div class="resultat-title">Temps restant' + (limiteCuveActive ? ' (limité par la cuve)' : '') + '</div><div class="resultat-highlight">' + h + 'h ' + m + 'min</div><div>Fin estimée : ' + fin + '</div></div>';
-    html += '<div class="resultat-section"><div class="resultat-title">Colorant nécessaire (pour l\'objectif)</div><div class="resultat-highlight">' + colorant + ' kg</div></div>';
-
+    let html = '<div class="card">';
+    html += renderEnTete(reste, h, m, fin, limiteCuveActive);
+    html += cuveHtml;
+    html += renderAPrevoir(items);
     if (limiteCuveActive) {
-        html += '<div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 13px; color: #856404; font-weight: bold;">⚠️ Quantités et temps limités par la cuve</div>';
+        html += '<div style="margin-top: 12px; padding: 10px; background: #fff3cd; border-left: 4px solid #e74c3c; border-radius: 8px; font-size: 12px; color: #856404; font-weight: bold;">* Temps et quantités limités par la cuve</div>';
     }
-
     html += '</div>';
     return html;
 }

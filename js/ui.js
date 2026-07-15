@@ -41,8 +41,7 @@ function genererHTMLLigne(ligneId) {
     return `
         <div class="ligne-header">
             <h2>Ligne ${config.nom}
-                <span class="icon-ecrou" onclick="ouvrirReglageCadence('${ligneId}')" title="Cadence">🔩</span>
-                <span class="icon-ecrou" onclick="ouvrirReglageControle('${ligneId}')" title="Contrôle qualité">🕐</span>
+                <span class="icon-ecrou" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</span>
             </h2>
         </div>
         <div class="card">
