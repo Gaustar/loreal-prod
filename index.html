@@ -35,39 +35,51 @@
      de la ligne actuellement affichée, tap = valider le contrôle -->
 <div class="fab fab-controle" id="fab-controle">🕐</div>
 
-<!-- Modal Réglage Cadence -->
-<div class="modal-overlay" id="modal-cadence">
-    <div class="modal-box">
-        <h3 id="modal-cadence-title">🔩 Cadence</h3>
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label class="form-label">Pièces par minute :</label>
-            <input type="number" id="input-cadence" class="form-input" style="font-size: 24px; text-align: center;" min="1" step="1">
-        </div>
-        <div class="form-group" id="groupe-seuil-cuve" style="margin-bottom: 15px; display: none;">
-            <label class="form-label">Seuil minimum cuve (kg) :</label>
-            <input type="number" id="input-seuil-cuve" class="form-input" style="font-size: 20px; text-align: center;" min="0" step="1">
-        </div>
-        <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
-            <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageCadence()">Annuler</button>
-            <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverCadence()">Valider</button>
-        </div>
-        <button class="modal-reset-btn" onclick="resetCadence()">Rétablir la valeur par défaut</button>
-    </div>
-</div>
+<!-- Modal Réglages (unifié : cadence, seuil cuve, contrôle qualité, file d'attente) -->
+<div class="modal-overlay" id="modal-reglages">
+    <div class="modal-box modal-box-large">
+        <h3 id="modal-reglages-title">⚙️ Réglages</h3>
 
-<!-- Modal Réglage Contrôle Qualité -->
-<div class="modal-overlay" id="modal-controle">
-    <div class="modal-box">
-        <h3 id="modal-controle-title">🕐 Contrôle qualité</h3>
-        <div class="form-group" style="margin-bottom: 15px;">
-            <label class="form-label">Heure du premier contrôle (répété toutes les heures) :</label>
-            <input type="time" id="input-controle-heure" class="form-input" style="font-size: 22px; text-align: center;">
+        <div class="reglages-section">
+            <div class="reglages-section-titre">🔩 Cadence</div>
+            <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label">Pièces par minute :</label>
+                <input type="number" id="input-cadence" class="form-input" style="font-size: 22px; text-align: center;" min="1" step="1">
+            </div>
+            <button class="modal-reset-btn" onclick="resetCadenceReglages()">Rétablir la valeur par défaut</button>
         </div>
-        <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0;">
-            <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglageControle()">Annuler</button>
-            <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="sauverReglageControle()">Valider</button>
+
+        <div class="reglages-section" id="groupe-seuil-cuve" style="display: none;">
+            <div class="reglages-section-titre">🧪 Seuil cuve</div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label">Seuil minimum (kg) :</label>
+                <input type="number" id="input-seuil-cuve" class="form-input" style="font-size: 20px; text-align: center;" min="0" step="1">
+            </div>
         </div>
-        <button class="modal-reset-btn" onclick="reinitialiserControle()">Réinitialiser (désactiver le contrôle)</button>
+
+        <div class="reglages-section">
+            <div class="reglages-section-titre">🕐 Contrôle qualité</div>
+            <div class="form-group" style="margin-bottom: 8px;">
+                <label class="form-label">Heure de référence (répétée toutes les heures) :</label>
+                <input type="time" id="input-controle-heure" class="form-input" style="font-size: 20px; text-align: center;">
+            </div>
+            <button class="modal-reset-btn" onclick="resetControleReglages()">Désactiver le contrôle</button>
+        </div>
+
+        <div class="reglages-section">
+            <div class="reglages-section-titre">📋 File d'attente (<span id="commandes-count">0</span>)</div>
+            <div id="commandes-liste"></div>
+            <div class="commande-ajout">
+                <input type="number" id="input-nouvelle-commande" class="form-input" placeholder="Quantité" min="1" step="1">
+                <button class="btn-ajout-commande" onclick="ajouterCommande(ligneReglages)">➕</button>
+            </div>
+            <button class="btn-commande-suivante" onclick="commandeSuivante(ligneReglages)">▶ Commande suivante</button>
+        </div>
+
+        <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0; margin-top: 10px;">
+            <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglagesLigne()">Fermer</button>
+            <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="validerReglagesLigne()">Valider</button>
+        </div>
     </div>
 </div>
 
@@ -109,8 +121,10 @@
 <script src="js/cadence.js"></script>
 <script src="js/poste.js"></script>
 <script src="js/calcul-lignes.js"></script>
+<script src="js/commandes.js"></script>
 <script src="js/shift-timer.js"></script>
 <script src="js/controle-qualite.js"></script>
+<script src="js/reglages.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
