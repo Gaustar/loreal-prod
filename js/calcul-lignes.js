@@ -160,19 +160,36 @@ function calculerStandard(ligne, reste) {
     }
 
     const couleur = limiteCuveActive ? '#e74c3c' : null;
-    const pal = Math.floor(qte_a_produire / config.produitsParPalette);
-    const resteP = qte_a_produire % config.produitsParPalette;
-    const niv = Math.floor(resteP / config.produitsParNiveau);
-    const boit = Math.ceil((resteP % config.produitsParNiveau) / config.produitsParBoite);
     const minTot = qte_a_produire / config.vitesse;
     const hh = Math.floor(minTot / 60);
     const mm = Math.floor(minTot % 60);
     const finH = new Date(Date.now() + minTot * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    const items = [
-        { icone: '📦', label: 'Palettes complètes', valeur: pal + ' palettes', couleur },
-        { icone: '📐', label: 'Niveaux + boîtes', valeur: niv + ' niv. + ' + boit + ' boîtes', couleur }
-    ];
+    let items;
+    if (config.consommables) {
+        // Liste de consommables générique (ex: L70) : chaque entrée optionnelle
+        // n'apparaît que si sa case est cochée dans la carte de la ligne.
+        items = config.consommables
+            .filter(c => {
+                if (!c.optionnel) return true;
+                const chk = document.getElementById(`conso-${ligne}-${c.id}`);
+                return !!(chk && chk.checked);
+            })
+            .map(c => {
+                const nbBoites = Math.ceil(qte_a_produire / c.parBoite);
+                const capacite = nbBoites * c.parBoite;
+                return { icone: c.icone || '📦', label: c.label, valeur: nbBoites + ' boîtes', detail: capacite.toLocaleString() + ' pièces', couleur };
+            });
+    } else {
+        const pal = Math.floor(qte_a_produire / config.produitsParPalette);
+        const resteP = qte_a_produire % config.produitsParPalette;
+        const niv = Math.floor(resteP / config.produitsParNiveau);
+        const boit = Math.ceil((resteP % config.produitsParNiveau) / config.produitsParBoite);
+        items = [
+            { icone: '📦', label: 'Palettes complètes', valeur: pal + ' palettes', couleur },
+            { icone: '📐', label: 'Niveaux + boîtes', valeur: niv + ' niv. + ' + boit + ' boîtes', couleur }
+        ];
+    }
     if (config.colorant) {
         items.push({ icone: '🎨', label: 'Colorant (objectif)', valeur: ((reste / config.produitsParPalette) * config.colorant).toFixed(1) + ' kg' });
     }
@@ -397,5 +414,17 @@ function chargerToutesLesCuves() {
         checkCuve.checked = storageGet(`${ligne}-cuve-active`, 'false') === 'true';
         poidsInput.value = storageGet(`${ligne}-cuve-poids`, '');
         toggleCuveUI(ligne);
+    });
+}
+
+// Recharge l'état des cases de consommables optionnels (ex: notices sur L70)
+function chargerConsommablesOptionnels() {
+    Object.keys(LIGNES).forEach(ligne => {
+        const conso = LIGNES[ligne].consommables;
+        if (!conso) return;
+        conso.filter(c => c.optionnel).forEach(c => {
+            const chk = document.getElementById(`conso-${ligne}-${c.id}`);
+            if (chk) chk.checked = storageGet(`${ligne}-conso-${c.id}-actif`, 'false') === 'true';
+        });
     });
 }

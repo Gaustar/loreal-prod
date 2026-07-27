@@ -18,7 +18,13 @@ const LIGNES = {
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
-        vitesse: 150
+        vitesse: 150,
+        colorant: 42,
+        consommables: [
+            { id: 'tubes', label: 'Tubes (252/boîte)', parBoite: 252, optionnel: false, icone: '🧴' },
+            { id: 'etuis', label: 'Étuis (225/boîte)', parBoite: 225, optionnel: false, icone: '📦' },
+            { id: 'notices', label: 'Notices (1 200/paquet)', parBoite: 1200, optionnel: true, icone: '📄' }
+        ]
     },
     l74: {
         nom: "L74",

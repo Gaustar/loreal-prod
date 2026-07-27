@@ -76,6 +76,18 @@ function genererHTMLLigne(ligneId) {
             </div>
             ` : ''}
 
+            ${config.consommables && config.consommables.some(c => c.optionnel) ? `
+            <div class="form-group" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                ${config.consommables.filter(c => c.optionnel).map(c => `
+                <label class="repas-toggle" style="justify-content: flex-start; cursor: pointer;">
+                    <input type="checkbox" id="conso-${ligneId}-${c.id}" onchange="storageSet('${ligneId}-conso-${c.id}-actif', this.checked); calculer('${ligneId}')">
+                    <div class="repas-switch"></div>
+                    <span style="font-weight: 600; color: #333; font-size: 14px;">${c.icone || '📦'} Utiliser : ${c.label}</span>
+                </label>
+                `).join('')}
+            </div>
+            ` : ''}
+
             <div class="button-group">
                 <button class="btn btn-retirer" onclick="modifierPalette('${ligneId}', -1)">➖ PALETTE</button>
                 <button class="btn btn-ajouter" onclick="modifierPalette('${ligneId}', 1)">➕ PALETTE</button>

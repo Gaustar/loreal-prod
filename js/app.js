@@ -4,6 +4,7 @@ function init() {
     chargerCadences();
     chargerToutesLesDonnees();
     chargerToutesLesCuves();
+    chargerConsommablesOptionnels();
     initialiserPoste();
     attacherEvenementsPoste();
     initControleQualite();
