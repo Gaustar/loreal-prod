@@ -13,25 +13,18 @@ const LIGNES = {
         colorant: 35,
         hasPoste: true
     },
-    l70: {
-        nom: "L70",
+    ccg: {
+        nom: "Casting Crème Gloss (CCG)",
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
-        vitesse: 150,
+        vitesse: 103.5,
         colorant: 42,
         consommables: [
             { id: 'tubes', label: 'Tubes (252/boîte)', parBoite: 252, optionnel: false, icone: '🧴' },
             { id: 'etuis', label: 'Étuis (225/boîte)', parBoite: 225, optionnel: false, icone: '📦' },
             { id: 'notices', label: 'Notices (1 200/paquet)', parBoite: 1200, optionnel: true, icone: '📄' }
         ]
-    },
-    l74: {
-        nom: "L74",
-        produitsParPalette: 828,
-        produitsParNiveau: 138,
-        produitsParBoite: 6,
-        vitesse: 130
     },
     l87: {
         nom: "L87",
@@ -42,7 +35,7 @@ const LIGNES = {
     }
 };
 
-const CADENCES_DEFAUT = { l60: 72, l70: 150, l74: 130, l87: 75 };
+const CADENCES_DEFAUT = { l60: 72, ccg: 103.5, l87: 75 };
 
 // Ligne actuellement affichée (onglet actif) — utilisée par le FAB
 // de contrôle qualité pour savoir quel décompte afficher.
