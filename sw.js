@@ -1,4 +1,4 @@
-const CACHE_NAME = 'loreal-prod-v8';   // ← changez ce chiffre à chaque mise à jour
+const CACHE_NAME = 'loreal-prod-v9';   // ← changez ce chiffre à chaque mise à jour
 const urlsToCache = [
   '.',
   'index.html',
