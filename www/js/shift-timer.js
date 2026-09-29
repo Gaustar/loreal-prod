@@ -64,39 +64,35 @@ function majTimerShift() {
     const windowInfo = getShiftWindow(shiftActuel, now);
     const { start, end, status } = windowInfo;
 
-    let remainSec, pourcent;
-    let finTexte = `Fin du shift à ${String(SHIFTS[shiftActuel].fin.h).padStart(2, '0')}h${String(SHIFTS[shiftActuel].fin.m).padStart(2, '0')}`;
+    const countdownEl = document.getElementById('shift-countdown');
+    const debutTexte = `${String(SHIFTS[shiftActuel].debut.h).padStart(2, '0')}h${String(SHIFTS[shiftActuel].debut.m).padStart(2, '0')}`;
+    const finTexte = `Fin du shift à ${String(SHIFTS[shiftActuel].fin.h).padStart(2, '0')}h${String(SHIFTS[shiftActuel].fin.m).padStart(2, '0')}`;
 
-    if (status === 'avant') {
-        remainSec = (start - now) / 1000;
-        document.getElementById('shift-countdown').innerText = formatTime(remainSec);
-        document.getElementById('shift-progress-fill').style.width = '0%';
-        document.getElementById('shift-progress-text').innerText = "Le shift n'a pas encore commencé";
-        document.getElementById('shift-end-time').innerHTML = `Début à ${String(SHIFTS[shiftActuel].debut.h).padStart(2, '0')}h${String(SHIFTS[shiftActuel].debut.m).padStart(2, '0')}`;
-        return;
-    } else if (status === 'futur') {
-        remainSec = (start - now) / 1000;
-        document.getElementById('shift-countdown').innerText = formatTime(remainSec);
-        document.getElementById('shift-progress-fill').style.width = '0%';
-        document.getElementById('shift-progress-text').innerText = "Prochain shift";
-        document.getElementById('shift-end-time').innerHTML = `Début demain à ${String(SHIFTS[shiftActuel].debut.h).padStart(2, '0')}h${String(SHIFTS[shiftActuel].debut.m).padStart(2, '0')}`;
-        return;
-    } else {
+    if (status === 'pendant') {
         const totalSec = (end - start) / 1000;
         const elapsedSec = (now - start) / 1000;
-        remainSec = Math.max(0, totalSec - elapsedSec);
-        pourcent = Math.min(100, (elapsedSec / totalSec) * 100);
-        document.getElementById('shift-countdown').innerText = formatTime(remainSec);
+        const remainSec = Math.max(0, totalSec - elapsedSec);
+        const pourcent = Math.min(100, (elapsedSec / totalSec) * 100);
+        countdownEl.innerText = formatTime(remainSec);
         document.getElementById('shift-progress-fill').style.width = pourcent + '%';
         document.getElementById('shift-progress-text').innerText = pourcent.toFixed(1) + '% du shift effectué';
-        document.getElementById('shift-end-time').innerHTML = finTexte;
+        document.getElementById('shift-end-time').innerText = finTexte;
+        if (remainSec === 0) countdownEl.style.color = 'var(--or)';
+        else if (remainSec < 3600) countdownEl.style.color = 'var(--ok)';
+        else countdownEl.style.color = '';
+    } else {
+        // Shift pas encore commencé (aujourd'hui ou demain) : décompte avant
+        // démarrage, sans barre de progression ni couleur d'alerte héritée.
+        countdownEl.innerText = formatTime((start - now) / 1000);
+        countdownEl.style.color = '';
+        document.getElementById('shift-progress-fill').style.width = '0%';
+        document.getElementById('shift-progress-text').innerText =
+            status === 'avant' ? "Le shift n'a pas encore commencé" : 'Prochain shift';
+        document.getElementById('shift-end-time').innerText =
+            (status === 'avant' ? 'Début à ' : 'Début demain à ') + debutTexte;
     }
 
-    const countdownEl = document.getElementById('shift-countdown');
-    if (remainSec === 0) countdownEl.style.color = 'var(--or)';
-    else if (remainSec < 3600) countdownEl.style.color = 'var(--ok)';
-    else countdownEl.style.color = '';
-
+    // Le timer repas tourne quel que soit l'état du shift
     majTimerRepas();
 }
 
