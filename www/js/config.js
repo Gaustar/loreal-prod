@@ -5,14 +5,15 @@
 // nomCourt : libellé de l'onglet (doit tenir sur une rangée à 4 lignes).
 // couleur  : couleur d'identification de la ligne (onglet, bandeau, carte),
 //            pour voir d'un coup d'œil sur quelle ligne on saisit. Reprend la
-//            couleur de l'étui du produit (PROVISOIRE : d'après d'anciens
-//            étuis, à caler sur les étuis actuels). L87 : gamme inconnue.
+//            couleur de l'étui actuel (relevée sur photos, sept. 2026) :
+//            Excellence = bloc logo doré, CCG = bloc fuchsia, Color
+//            Sensation = bloc rouge. L87 : gamme inconnue, vert neutre.
 
 const LIGNES = {
     l60: {
         nom: "Excellence",
         nomCourt: "Excellence",
-        couleur: "#D4A63C",
+        couleur: "#D1B28A",
         produitsParPalette: 720,
         produitsParNiveau: 120,
         produitsParBoite: 6,
@@ -23,7 +24,7 @@ const LIGNES = {
     ccg: {
         nom: "Casting Crème Gloss",
         nomCourt: "CCG",
-        couleur: "#E0307F",
+        couleur: "#D82D88",
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
@@ -38,7 +39,7 @@ const LIGNES = {
     l72: {
         nom: "Color Sensation",
         nomCourt: "Color S.",
-        couleur: "#D42A2F",
+        couleur: "#870C27",
         produitsParPalette: 1260,
         produitsParNiveau: 210,
         produitsParBoite: 6,

@@ -5,18 +5,39 @@ function fmt(n) {
     return Number(n).toLocaleString('fr-FR');
 }
 
-// Texte noir ou blanc selon la clarté de la couleur de ligne (le rouge
-// Color Sensation illisible en noir, l'or illisible en blanc).
-function couleurTexteSur(hex) {
+function luminance(hex) {
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
         .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
-    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-    return lum > 0.2 ? '#111111' : '#FFFFFF';
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+// Éclaircit une couleur en gardant sa teinte et sa saturation (passage en
+// HSL, luminosité remontée à au moins `lumMin`), au lieu de la délaver en
+// la mélangeant avec du blanc.
+function eclaircir(hex, lumMin) {
+    let [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+    let h = 0, sat = 0, l = (max + min) / 2;
+    if (d) {
+        sat = d / (1 - Math.abs(2 * l - 1));
+        h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        if (h < 0) h += 6;
+    }
+    l = Math.max(l, lumMin);
+    const c = (1 - Math.abs(2 * l - 1)) * sat, x = c * (1 - Math.abs((h % 2) - 1)), m = l - c / 2;
+    const [r1, g1, b1] = h < 1 ? [c, x, 0] : h < 2 ? [x, c, 0] : h < 3 ? [0, c, x] : h < 4 ? [0, x, c] : h < 5 ? [x, 0, c] : [c, 0, x];
+    return '#' + [r1, g1, b1].map(v => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+}
+
+// --ligne       : couleur exacte de l'étui (onglet, bandeau, boutons)
+// --sur-ligne   : texte noir ou blanc lisible sur cette couleur
+// --ligne-texte : variante lisible sur fond sombre (le rouge Color Sensation
+//                 est trop foncé pour écrire le nom de ligne en thème sombre)
 function poserCouleurLigne(el, couleur) {
+    const lum = luminance(couleur);
     el.style.setProperty('--ligne', couleur);
-    el.style.setProperty('--sur-ligne', couleurTexteSur(couleur));
+    el.style.setProperty('--sur-ligne', lum > 0.2 ? '#111111' : '#FFFFFF');
+    el.style.setProperty('--ligne-texte', lum < 0.12 ? eclaircir(couleur, 0.45) : couleur);
 }
 
 function genererTabsEtContenus() {
