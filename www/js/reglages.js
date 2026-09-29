@@ -10,6 +10,7 @@ let ligneReglages = null;
 function ouvrirReglagesLigne(ligne) {
     ligneReglages = ligne;
     document.getElementById('modal-reglages-title').innerText = '⚙️ Réglages — ' + LIGNES[ligne].nom;
+    document.getElementById('modal-reglages').style.setProperty('--ligne', LIGNES[ligne].couleur);
 
     // Cadence
     document.getElementById('input-cadence').value = LIGNES[ligne].vitesse;

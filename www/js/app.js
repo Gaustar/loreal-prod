@@ -1,5 +1,6 @@
 // ========== INITIALISATION ==========
 function init() {
+    appliquerTheme(storageGet('theme', 'dark'));
     genererTabsEtContenus();
     chargerCadences();
     chargerToutesLesDonnees();
@@ -8,6 +9,7 @@ function init() {
     initialiserPoste();
     attacherEvenementsPoste();
     initControleQualite();
+    initPause();
 
     Object.keys(LIGNES).forEach(ligne => {
         const totalInp = document.getElementById('total-' + ligne);

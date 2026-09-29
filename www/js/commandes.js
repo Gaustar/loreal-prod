@@ -96,19 +96,27 @@ function commandeSuivante(ligne) {
     const fait = parseInt(faitInput.value) || 0;
     const reste = Math.max(0, total - fait);
 
-    if (reste > 0) {
-        const ok = confirm(`La production en cours n'est pas terminée (${reste.toLocaleString()} pièces restantes).\n\nPasser à la commande suivante quand même ?`);
-        if (!ok) return;
-    }
+    const charger = () => {
+        const prochaine = liste.shift();
+        reinitialiser(ligne);
+        totalInput.value = prochaine.quantite;
+        sauvegarderValeur(ligne, 'total', prochaine.quantite);
+        sauvegarderCommandes(ligne, liste);
+        calculer(ligne);
+        renderListeCommandes(ligne);
+        afficherAlerteTemporaire('▶ Commande chargée : ' + fmt(prochaine.quantite) + ' pièces');
+    };
 
-    const prochaine = liste.shift();
-    reinitialiser(ligne);
-    totalInput.value = prochaine.quantite;
-    sauvegarderValeur(ligne, 'total', prochaine.quantite);
-    sauvegarderCommandes(ligne, liste);
-    calculer(ligne);
-    renderListeCommandes(ligne);
-    afficherAlerteTemporaire('▶ Commande chargée : ' + prochaine.quantite.toLocaleString() + ' pièces');
+    if (reste > 0) {
+        demanderConfirmation({
+            titre: 'Production pas terminée',
+            message: `${LIGNES[ligne].nom} : il reste ${fmt(reste)} pièces.\n\nPasser à la commande suivante quand même ?`,
+            libelleOk: 'Passer',
+            onOk: charger
+        });
+    } else {
+        charger();
+    }
 }
 
 // Génère le HTML de la file d'attente dans le modal réglages (appelé à
@@ -140,10 +148,10 @@ function renderListeCommandes(ligne) {
             html += `
                 <div class="commande-ligne">
                     <span class="commande-fleches">
-                        <span class="commande-action" style="${index === 0 ? 'opacity:0.25;pointer-events:none;' : ''}" onclick="deplacerCommande('${ligne}', '${cmd.id}', -1)">⬆️</span>
-                        <span class="commande-action" style="${index === liste.length - 1 ? 'opacity:0.25;pointer-events:none;' : ''}" onclick="deplacerCommande('${ligne}', '${cmd.id}', 1)">⬇️</span>
+                        <span class="commande-action${index === 0 ? ' inactif' : ''}" onclick="deplacerCommande('${ligne}', '${cmd.id}', -1)">▲</span>
+                        <span class="commande-action${index === liste.length - 1 ? ' inactif' : ''}" onclick="deplacerCommande('${ligne}', '${cmd.id}', 1)">▼</span>
                     </span>
-                    <span class="commande-quantite">${cmd.quantite.toLocaleString()} pièces</span>
+                    <span class="commande-quantite">${fmt(cmd.quantite)} pièces</span>
                     <span class="commande-action" onclick="modifierCommandeDemarrer('${ligne}', '${cmd.id}')">✏️</span>
                     <span class="commande-action" onclick="supprimerCommande('${ligne}', '${cmd.id}')">🗑️</span>
                 </div>`;

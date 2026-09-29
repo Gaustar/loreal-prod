@@ -35,6 +35,7 @@ function ouvrirTimerShift() {
     shiftActuel = detecterShiftAuto();
     appliquerShiftUI();
     chargerRepas();
+    majPause();
     document.getElementById('modal-shift').classList.add('active');
     majTimerShift();
     if (shiftInterval) clearInterval(shiftInterval);
@@ -92,9 +93,9 @@ function majTimerShift() {
     }
 
     const countdownEl = document.getElementById('shift-countdown');
-    if (remainSec === 0) countdownEl.style.color = '#C5A028';
-    else if (remainSec < 3600) countdownEl.style.color = '#2ecc71';
-    else countdownEl.style.color = '#ffffff';
+    if (remainSec === 0) countdownEl.style.color = 'var(--or)';
+    else if (remainSec < 3600) countdownEl.style.color = 'var(--ok)';
+    else countdownEl.style.color = '';
 
     majTimerRepas();
 }

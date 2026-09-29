@@ -3,36 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0E1012">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>L'Oréal - Suivi Production</title>
+    <!-- Thème appliqué avant le premier rendu, pour éviter un flash clair/sombre -->
+    <script>
+        try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; }
+        catch (e) { document.documentElement.dataset.theme = 'dark'; }
+    </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="header">
-    <h1>L'ORÉAL</h1>
-    <p>Suivi de Production</p>
-</div>
+<header class="topbar">
+    <div class="topbar-marque">
+        <span class="topbar-logo">L'ORÉAL</span>
+        <span class="topbar-sous">Suivi de production</span>
+    </div>
+    <button class="btn-icone" id="btn-theme" onclick="basculerTheme()" title="Changer de thème">☀️</button>
+</header>
 
-<div class="tabs" id="tabs-container"></div>
-<div id="contents-container"></div>
+<nav class="tabs" id="tabs-container"></nav>
+<main id="contents-container"></main>
 
-<div class="footer">
-    Programme fait maison 🛠️<br>
-    <span style="font-size: 11px; color: #ccc;">Bon courage ! 💪</span>
-</div>
+<footer class="footer">
+    Programme fait maison 🛠️ · Bon courage ! 💪
+</footer>
 
-<!-- Bouton flottant pour le minuteur de shift (bas gauche) -->
-<div class="fab fab-timer" onclick="ouvrirTimerShift()">⏱️</div>
+<!-- Bouton flottant minuteur de shift / pause (bas gauche) : affiche le
+     décompte de la pause quand un chrono de pause est lancé -->
+<div class="fab fab-timer" id="fab-timer" onclick="ouvrirTimerShift()">⏱️</div>
 
-<!-- Bouton flottant pour avis (bas droite) -->
-<div class="fab fab-avis" onclick="ouvrirAvis()">💬</div>
-
-<!-- Bouton flottant pour le contrôle qualité (bas centre) : affiche le décompte
-     de la ligne actuellement affichée, tap = valider le contrôle -->
+<!-- Bouton flottant contrôle qualité (bas centre) : décompte de la ligne
+     affichée, appui long = valider le contrôle -->
 <div class="fab fab-controle" id="fab-controle">🕐</div>
 
 <!-- Modal Réglages (unifié : cadence, seuil cuve, contrôle qualité, file d'attente) -->
@@ -42,72 +47,93 @@
 
         <div class="reglages-section">
             <div class="reglages-section-titre">🔩 Cadence</div>
-            <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label">Pièces par minute :</label>
-                <input type="number" id="input-cadence" class="form-input" style="font-size: 22px; text-align: center;" min="1" step="0.1">
-            </div>
-            <button class="modal-reset-btn" onclick="resetCadenceReglages()">Rétablir la valeur par défaut</button>
+            <label class="form-label" for="input-cadence">Pièces par minute</label>
+            <input type="number" id="input-cadence" class="form-input form-input-centre" min="1" step="0.1" inputmode="decimal">
+            <button class="lien-discret" onclick="resetCadenceReglages()">Rétablir la valeur par défaut</button>
         </div>
 
         <div class="reglages-section" id="groupe-seuil-cuve" style="display: none;">
             <div class="reglages-section-titre">🧪 Seuil cuve</div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <label class="form-label">Seuil minimum (kg) :</label>
-                <input type="number" id="input-seuil-cuve" class="form-input" style="font-size: 20px; text-align: center;" min="0" step="1">
-            </div>
+            <label class="form-label" for="input-seuil-cuve">Seuil minimum (kg)</label>
+            <input type="number" id="input-seuil-cuve" class="form-input form-input-centre" min="0" step="1" inputmode="decimal">
         </div>
 
         <div class="reglages-section">
             <div class="reglages-section-titre">🕐 Contrôle qualité</div>
-            <div class="form-group" style="margin-bottom: 8px;">
-                <label class="form-label">Heure de référence (répétée toutes les heures) :</label>
-                <input type="time" id="input-controle-heure" class="form-input" style="font-size: 20px; text-align: center;">
-            </div>
-            <button class="modal-reset-btn" onclick="resetControleReglages()">Désactiver le contrôle</button>
+            <label class="form-label" for="input-controle-heure">Heure de référence (répétée toutes les heures)</label>
+            <input type="time" id="input-controle-heure" class="form-input form-input-centre">
+            <button class="lien-discret" onclick="resetControleReglages()">Désactiver le contrôle</button>
         </div>
 
         <div class="reglages-section">
             <div class="reglages-section-titre">📋 File d'attente (<span id="commandes-count">0</span>)</div>
             <div id="commandes-liste"></div>
             <div class="commande-ajout">
-                <input type="number" id="input-nouvelle-commande" class="form-input" placeholder="Quantité" min="1" step="1">
-                <button class="btn-ajout-commande" onclick="ajouterCommande(ligneReglages)">➕</button>
+                <input type="number" id="input-nouvelle-commande" class="form-input" placeholder="Quantité" min="1" step="1" inputmode="numeric">
+                <button class="btn-ajout-commande" onclick="ajouterCommande(ligneReglages)">＋</button>
             </div>
-            <button class="btn-commande-suivante" onclick="commandeSuivante(ligneReglages)">▶ Commande suivante</button>
+            <button class="btn btn-sombre btn-plein" onclick="commandeSuivante(ligneReglages)">▶ Commande suivante</button>
         </div>
 
-        <div class="button-group" style="grid-template-columns: 1fr 1fr; margin-bottom: 0; margin-top: 10px;">
-            <button class="btn btn-reset" style="grid-column: span 1; margin-top: 0;" onclick="fermerReglagesLigne()">Fermer</button>
-            <button class="btn btn-ajouter" style="grid-column: span 1;" onclick="validerReglagesLigne()">Valider</button>
+        <div class="modal-actions">
+            <button class="btn btn-secondaire" onclick="fermerReglagesLigne()">Fermer</button>
+            <button class="btn btn-primaire" onclick="validerReglagesLigne()">Valider</button>
         </div>
     </div>
 </div>
 
-<!-- Modal Timer de Shift -->
+<!-- Modal de confirmation (remplace le confirm() natif) -->
+<div class="modal-overlay" id="modal-confirm">
+    <div class="modal-box">
+        <h3 id="confirm-titre">Confirmer</h3>
+        <p class="confirm-message" id="confirm-message"></p>
+        <div class="modal-actions">
+            <button class="btn btn-secondaire" id="confirm-annuler">Annuler</button>
+            <button class="btn btn-danger" id="confirm-ok">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Timer de Shift + pause -->
 <div class="modal-overlay" id="modal-shift">
     <div class="shift-modal-box">
-        <div class="shift-selector">
+        <div class="segmente">
             <button id="btn-shift-matin" onclick="choisirShift('matin')">☀️ Matin</button>
-            <button id="btn-shift-aprem" onclick="choisirShift('aprem')">🌤️ Après-m</button>
+            <button id="btn-shift-aprem" onclick="choisirShift('aprem')">🌤️ Après-midi</button>
         </div>
         <div class="shift-label" id="shift-label">CHARGEMENT...</div>
         <div class="shift-countdown" id="shift-countdown">--:--:--</div>
-        <div class="shift-progress-bar"><div class="shift-progress-fill" id="shift-progress-fill"></div></div>
+        <div class="barre barre-fine"><div class="barre-fill" id="shift-progress-fill"></div></div>
         <div class="shift-meta" id="shift-progress-text">0% du shift effectué</div>
-        <div class="shift-meta" id="shift-end-time" style="margin-top: 10px; color: #C5A028; font-weight: bold;">Fin à --h--</div>
-        <div class="repas-section">
-            <label class="repas-toggle">
+        <div class="shift-meta shift-fin" id="shift-end-time">Fin à --h--</div>
+
+        <section class="shift-bloc">
+            <div class="shift-bloc-titre">☕ Pause</div>
+            <div id="pause-inactive">
+                <div class="pause-presets" id="pause-presets"></div>
+            </div>
+            <div id="pause-active" style="display: none;">
+                <div class="pause-countdown" id="pause-countdown">00:00</div>
+                <div class="shift-meta" id="pause-label">de pause restantes</div>
+                <div class="barre barre-fine"><div class="barre-fill" id="pause-progress-fill"></div></div>
+                <button class="btn btn-secondaire btn-plein" onclick="arreterPause()">■ Terminer la pause</button>
+            </div>
+        </section>
+
+        <section class="shift-bloc">
+            <label class="toggle toggle-centre">
                 <span>🍴 Timer repas</span>
                 <input type="checkbox" id="repas-actif" onchange="toggleRepas()">
-                <div class="repas-switch"></div>
+                <span class="toggle-switch"></span>
             </label>
             <div class="repas-config" id="repas-config">
                 <input type="time" id="repas-heure" class="repas-time-input" onchange="sauverHeureRepas()">
                 <div class="repas-countdown" id="repas-countdown">--:--:--</div>
-                <div class="repas-label-small" id="repas-label">avant la pause</div>
+                <div class="shift-meta" id="repas-label">avant la pause</div>
             </div>
-        </div>
-        <button class="shift-close-btn" onclick="fermerTimerShift()">Fermer</button>
+        </section>
+
+        <button class="btn btn-secondaire shift-close-btn" onclick="fermerTimerShift()">Fermer</button>
     </div>
 </div>
 
@@ -123,6 +149,7 @@
 <script src="js/calcul-lignes.js"></script>
 <script src="js/commandes.js"></script>
 <script src="js/shift-timer.js"></script>
+<script src="js/pause.js"></script>
 <script src="js/controle-qualite.js"></script>
 <script src="js/reglages.js"></script>
 <script src="js/app.js"></script>

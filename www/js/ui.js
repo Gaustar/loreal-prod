@@ -1,5 +1,10 @@
 // ========== GÉNÉRATION DYNAMIQUE DES ONGLETS ==========
 
+// Format des nombres de pièces, indépendant de la langue du téléphone
+function fmt(n) {
+    return Number(n).toLocaleString('fr-FR');
+}
+
 function genererTabsEtContenus() {
     const tabsContainer = document.getElementById('tabs-container');
     const contentsContainer = document.getElementById('contents-container');
@@ -9,93 +14,111 @@ function genererTabsEtContenus() {
     const dernierOnglet = storageGet('dernier-onglet', null);
     ligneActiveCourante = (dernierOnglet && LIGNES[dernierOnglet]) ? dernierOnglet : Object.keys(LIGNES)[0];
 
-    Object.keys(LIGNES).forEach((ligneId, index) => {
+    Object.keys(LIGNES).forEach(ligneId => {
+        const config = LIGNES[ligneId];
         const estActive = ligneId === ligneActiveCourante;
+
         const tabBtn = document.createElement('button');
         tabBtn.className = `tab ${ligneId}`;
+        tabBtn.style.setProperty('--ligne', config.couleur);
         if (estActive) tabBtn.classList.add('active');
-        tabBtn.textContent = LIGNES[ligneId].nom;
+        tabBtn.innerHTML = `<span class="tab-pastille"></span>${config.nomCourt || config.nom}`;
         tabBtn.onclick = () => switchTab(ligneId);
         tabsContainer.appendChild(tabBtn);
 
         const contentDiv = document.createElement('div');
         contentDiv.id = ligneId;
         contentDiv.className = 'content';
+        contentDiv.style.setProperty('--ligne', config.couleur);
         if (estActive) contentDiv.classList.add('active');
         contentDiv.innerHTML = genererHTMLLigne(ligneId);
         contentsContainer.appendChild(contentDiv);
     });
+
+    appliquerCouleurLigneActive();
 }
 
 function genererHTMLLigne(ligneId) {
     const config = LIGNES[ligneId];
-    let posteSelectorHtml = '';
-    if (config.hasPoste) {
-        posteSelectorHtml = `
-            <div class="poste-selector" id="poste-selector-${ligneId}">
-                <div class="poste-btn" data-poste="arriere">🔧 Arrière (Remplissage)</div>
-                <div class="poste-btn" data-poste="avant">📦 Avant (Qualité)</div>
-            </div>
-        `;
-    }
-    return `
-        <div class="ligne-header">
-            <h2>Ligne ${config.nom}
-                <span class="icon-ecrou" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</span>
-            </h2>
-        </div>
-        <div class="card">
-            <div id="progress-text-${ligneId}">Progression: 0%</div>
-            <div class="progress-bar"><div id="progress-fill-${ligneId}" class="progress-fill"></div></div>
-        </div>
-        <div class="card">
-            ${posteSelectorHtml}
-            <div class="form-group">
-                <label class="form-label">Quantité totale à produire :</label>
-                <input type="number" id="total-${ligneId}" class="form-input" placeholder="Ex: 5000" min="1" step="1">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Déjà produit :</label>
-                <input type="number" id="fait-${ligneId}" class="form-input" value="0" min="0" step="1">
-            </div>
 
-            ${config.colorant ? `
-            <div class="form-group" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                <label class="repas-toggle" style="justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="check-cuve-${ligneId}" onchange="toggleCuveUI('${ligneId}')">
-                    <div class="repas-switch"></div>
-                    <span id="label-cuve-${ligneId}" style="font-weight: 600; color: #333; font-size: 14px;">🧪 Suivre la cuve (min. ${getSeuilCuve(ligneId)}kg)</span>
-                </label>
-                <div id="config-cuve-${ligneId}" class="repas-config" style="margin-top: 10px;">
-                    <label class="form-label" style="display:flex; align-items:center; justify-content:space-between;">
-                        <span>Poids actuel dans la cuve (kg) :</span>
-                        <span class="icon-ecrou" onclick="resetCuve('${ligneId}')" title="Réinitialiser la cuve">🔄</span>
-                    </label>
-                    <input type="number" id="poids-cuve-${ligneId}" class="form-input" placeholder="Ex: 200" min="0" step="1" oninput="sauvegarderPoidsCuve('${ligneId}', this.value); calculer('${ligneId}')" style="font-size: 18px;">
+    const posteSelectorHtml = config.hasPoste ? `
+        <div class="segmente poste-selector" id="poste-selector-${ligneId}">
+            <button class="poste-btn" data-poste="arriere">🔧 Arrière · Remplissage</button>
+            <button class="poste-btn" data-poste="avant">📦 Avant · Qualité</button>
+        </div>` : '';
+
+    const cuveHtml = config.colorant ? `
+        <div class="bloc-option">
+            <label class="toggle">
+                <input type="checkbox" id="check-cuve-${ligneId}" onchange="toggleCuveUI('${ligneId}')">
+                <span class="toggle-switch"></span>
+                <span class="toggle-label" id="label-cuve-${ligneId}">🧪 Suivre la cuve (min. ${getSeuilCuve(ligneId)} kg)</span>
+            </label>
+            <div id="config-cuve-${ligneId}" class="cuve-config">
+                <label class="form-label" for="poids-cuve-${ligneId}">Poids actuel dans la cuve (kg)</label>
+                <div class="champ-avec-action">
+                    <input type="number" id="poids-cuve-${ligneId}" class="form-input" placeholder="Ex : 200" min="0" step="1" inputmode="decimal"
+                           oninput="sauvegarderPoidsCuve('${ligneId}', this.value); calculer('${ligneId}')">
+                    <button class="btn-icone" onclick="resetCuve('${ligneId}')" title="Réinitialiser la cuve">↺</button>
                 </div>
             </div>
-            ` : ''}
+        </div>` : '';
 
-            ${config.consommables && config.consommables.some(c => c.optionnel) ? `
-            <div class="form-group" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px;">
-                ${config.consommables.filter(c => c.optionnel).map(c => `
-                <label class="repas-toggle" style="justify-content: flex-start; cursor: pointer;">
-                    <input type="checkbox" id="conso-${ligneId}-${c.id}" onchange="storageSet('${ligneId}-conso-${c.id}-actif', this.checked); calculer('${ligneId}')">
-                    <div class="repas-switch"></div>
-                    <span style="font-weight: 600; color: #333; font-size: 14px;">${c.icone || '📦'} Utiliser : ${c.label}</span>
-                </label>
-                `).join('')}
-            </div>
-            ` : ''}
+    const optionnels = (config.consommables || []).filter(c => c.optionnel);
+    const consoHtml = optionnels.length ? `
+        <div class="bloc-option">
+            ${optionnels.map(c => `
+            <label class="toggle">
+                <input type="checkbox" id="conso-${ligneId}-${c.id}" onchange="storageSet('${ligneId}-conso-${c.id}-actif', this.checked); calculer('${ligneId}')">
+                <span class="toggle-switch"></span>
+                <span class="toggle-label">${c.icone || '📦'} Utiliser : ${c.label}</span>
+            </label>`).join('')}
+        </div>` : '';
 
-            <div class="button-group">
-                <button class="btn btn-retirer" onclick="modifierPalette('${ligneId}', -1)">➖ PALETTE</button>
-                <button class="btn btn-ajouter" onclick="modifierPalette('${ligneId}', 1)">➕ PALETTE</button>
-                <button class="btn btn-calculer" onclick="calculer('${ligneId}')">CALCULER</button>
-                <button class="btn btn-reset" onclick="reinitialiser('${ligneId}')">RÉINITIALISER</button>
+    return `
+        <section class="hero">
+            <div class="hero-entete">
+                <div class="hero-nom">
+                    <span class="hero-code">Ligne ${ligneId.toUpperCase()}</span>
+                    <h2>${config.nom}</h2>
+                </div>
+                <button class="btn-icone btn-reglages" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</button>
             </div>
+            <div id="kpi-${ligneId}"></div>
+            <div class="progression">
+                <div class="progression-texte">
+                    <span id="progress-qte-${ligneId}">0 / —</span>
+                    <span id="progress-text-${ligneId}">0,0 %</span>
+                </div>
+                <div class="barre"><div id="progress-fill-${ligneId}" class="barre-fill"></div></div>
+            </div>
+        </section>
+
+        <div class="palette-stepper">
+            <button class="btn btn-palette-moins" onclick="modifierPalette('${ligneId}', -1)">− Palette</button>
+            <button class="btn btn-palette-plus" onclick="modifierPalette('${ligneId}', 1)">+ Palette</button>
         </div>
+        <div class="palette-info">1 palette = ${fmt(config.produitsParPalette)} pièces</div>
+
+        <section class="card">
+            ${posteSelectorHtml}
+            <div class="saisie-grille">
+                <div>
+                    <label class="form-label" for="total-${ligneId}">Objectif</label>
+                    <input type="number" id="total-${ligneId}" class="form-input" placeholder="Ex : 5000" min="1" step="1" inputmode="numeric">
+                </div>
+                <div>
+                    <label class="form-label" for="fait-${ligneId}">Déjà produit</label>
+                    <input type="number" id="fait-${ligneId}" class="form-input" value="0" min="0" step="1" inputmode="numeric">
+                </div>
+            </div>
+            ${cuveHtml}
+            ${consoHtml}
+        </section>
+
         <div id="resultat-${ligneId}"></div>
+
+        <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
     `;
 }
 
@@ -104,7 +127,7 @@ function genererHTMLLigne(ligneId) {
 // chaque fois que le seuil est modifié via le menu Réglages.
 function majLabelCuve(ligneId) {
     const el = document.getElementById(`label-cuve-${ligneId}`);
-    if (el) el.innerText = `🧪 Suivre la cuve (min. ${getSeuilCuve(ligneId)}kg)`;
+    if (el) el.innerText = `🧪 Suivre la cuve (min. ${getSeuilCuve(ligneId)} kg)`;
 }
 
 function switchTab(ligneId) {
@@ -114,36 +137,64 @@ function switchTab(ligneId) {
     document.getElementById(ligneId).classList.add('active');
     ligneActiveCourante = ligneId;
     storageSet('dernier-onglet', ligneId);
+    appliquerCouleurLigneActive();
     if (typeof majFabControle === 'function') majFabControle();
 }
 
+// La couleur de la ligne affichée teinte le haut de l'écran : on sait
+// toujours sur quelle ligne on est, même en ayant fait défiler la page.
+function appliquerCouleurLigneActive() {
+    const config = LIGNES[ligneActiveCourante];
+    if (config) document.documentElement.style.setProperty('--ligne-active', config.couleur);
+}
+
+// ========== THÈME ==========
+
+function appliquerTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const btn = document.getElementById('btn-theme');
+    if (btn) btn.innerText = theme === 'dark' ? '☀️' : '🌙';
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = theme === 'dark' ? '#0E1012' : '#F4F4F2';
+}
+
+function basculerTheme() {
+    const nouveau = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    storageSet('theme', nouveau);
+    appliquerTheme(nouveau);
+}
+
+// ========== NOTIFICATIONS / CONFIRMATION ==========
+
 function afficherAlerteTemporaire(message) {
-    let toast = document.createElement('div');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
     toast.innerText = message;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '100px';
-    toast.style.left = '20px';
-    toast.style.right = '20px';
-    toast.style.backgroundColor = '#333';
-    toast.style.color = '#C5A028';
-    toast.style.padding = '12px';
-    toast.style.borderRadius = '40px';
-    toast.style.textAlign = 'center';
-    toast.style.zIndex = '3000';
-    toast.style.fontWeight = 'bold';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2000);
 }
 
-function ouvrirAvis() {
-    const url = 'https://docs.google.com/forms/d/e/1FAIpQLSft9tV_WZysn_8iuCZ3agsb_NX4DImhX0hkei1P39CXv7Byug/viewform?usp=dialog';
-    // Dans un wrapper Capacitor, window.open('_blank') n'ouvre pas de navigateur externe
-    // (WebView unique, sans bouton retour) : on passe par le plugin Browser s'il est
-    // présent, avec repli sur window.open pour garder le comportement PWA/web inchangé.
-    const browserPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser;
-    if (browserPlugin) {
-        browserPlugin.open({ url });
-    } else {
-        window.open(url, '_blank');
-    }
+// Remplace le confirm() natif (bloquant, non stylable) par une modale de
+// l'app. onOk n'est appelé que si l'utilisateur confirme.
+function demanderConfirmation({ titre, message, libelleOk, onOk }) {
+    const modal = document.getElementById('modal-confirm');
+    document.getElementById('confirm-titre').innerText = titre;
+    document.getElementById('confirm-message').innerText = message;
+    const btnOk = document.getElementById('confirm-ok');
+    btnOk.innerText = libelleOk || 'OK';
+
+    const fermer = () => modal.classList.remove('active');
+    btnOk.onclick = () => { fermer(); onOk(); };
+    document.getElementById('confirm-annuler').onclick = fermer;
+    modal.onclick = (e) => { if (e.target === modal) fermer(); };
+    modal.classList.add('active');
+}
+
+function demanderReinitialisation(ligne) {
+    demanderConfirmation({
+        titre: `Réinitialiser ${LIGNES[ligne].nom} ?`,
+        message: "L'objectif, la quantité produite et la cuve de cette ligne seront effacés.",
+        libelleOk: 'Réinitialiser',
+        onOk: () => reinitialiser(ligne)
+    });
 }

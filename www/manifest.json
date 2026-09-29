@@ -1,11 +1,11 @@
 {
   "name": "L'Oréal Suivi Production",
   "short_name": "Prod L'Oréal",
-  "description": "Outil de suivi de production pour les lignes Excellence (L60), CCG, L87",
+  "description": "Outil de suivi de production pour les lignes Excellence (L60), CCG, Color Sensation (L72), L87",
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
+  "theme_color": "#0E1012",
+  "background_color": "#0E1012",
   "orientation": "portrait",
   "icons": [
     {

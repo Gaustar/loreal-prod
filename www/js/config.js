@@ -2,10 +2,15 @@
 // Toute nouvelle ligne de production s'ajoute ici.
 // Si une ligne a besoin d'une logique de calcul spécifique (comme l60),
 // voir js/calcul-lignes.js pour enregistrer une stratégie dédiée.
+// nomCourt : libellé de l'onglet (doit tenir sur une rangée à 4 lignes).
+// couleur  : couleur d'identification de la ligne (onglet, bandeau, carte),
+//            pour voir d'un coup d'œil sur quelle ligne on saisit.
 
 const LIGNES = {
     l60: {
         nom: "Excellence",
+        nomCourt: "Excellence",
+        couleur: "#E0A82E",
         produitsParPalette: 720,
         produitsParNiveau: 120,
         produitsParBoite: 6,
@@ -14,7 +19,9 @@ const LIGNES = {
         hasPoste: true
     },
     ccg: {
-        nom: "Casting Crème Gloss (CCG)",
+        nom: "Casting Crème Gloss",
+        nomCourt: "CCG",
+        couleur: "#3FA7E0",
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
@@ -28,6 +35,8 @@ const LIGNES = {
     },
     l72: {
         nom: "Color Sensation",
+        nomCourt: "Color S.",
+        couleur: "#C46BE8",
         produitsParPalette: 1260,
         produitsParNiveau: 210,
         produitsParBoite: 6,
@@ -41,6 +50,8 @@ const LIGNES = {
     },
     l87: {
         nom: "L87",
+        nomCourt: "L87",
+        couleur: "#3CC48F",
         produitsParPalette: 1920,
         produitsParNiveau: 384,
         produitsParBoite: 6,
@@ -48,7 +59,14 @@ const LIGNES = {
     }
 };
 
-const CADENCES_DEFAUT = { l60: 72, ccg: 103.5, l72: 100, l87: 75 };
+// Cadences d'usine, relevées avant que chargerCadences() n'applique les
+// cadences personnalisées : une seule source de vérité (LIGNES).
+const CADENCES_DEFAUT = Object.fromEntries(
+    Object.entries(LIGNES).map(([id, l]) => [id, l.vitesse])
+);
+
+// Durées proposées pour le chrono de pause (minutes). 0 = chrono libre.
+const PAUSES_PRESETS = [10, 15, 20, 30, 0];
 
 // Ligne actuellement affichée (onglet actif) — utilisée par le FAB
 // de contrôle qualité pour savoir quel décompte afficher.
