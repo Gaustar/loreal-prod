@@ -105,9 +105,9 @@ button { font-family: inherit; color: inherit; }
 .tab.active {
     background: var(--ligne);
     border-color: var(--ligne);
-    color: #111;
+    color: var(--sur-ligne);
 }
-.tab.active .tab-pastille { background: #111; }
+.tab.active .tab-pastille { background: var(--sur-ligne); }
 
 .content { display: none; padding: 14px 14px 0; animation: fadeIn 0.2s; }
 .content.active { display: block; }
@@ -136,7 +136,7 @@ button { font-family: inherit; color: inherit; }
     font-weight: 800;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: #111;
+    color: var(--sur-ligne);
     background: var(--ligne);
     padding: 3px 9px;
     border-radius: 6px;
@@ -199,7 +199,7 @@ button { font-family: inherit; color: inherit; }
     gap: 10px;
 }
 .btn-palette-moins { background: var(--surface-2); color: var(--attention); border: 2px solid var(--attention); }
-.btn-palette-plus { background: var(--ligne); color: #111; font-size: 20px; }
+.btn-palette-plus { background: var(--ligne); color: var(--sur-ligne); font-size: 20px; }
 .palette-info { text-align: center; font-size: 12px; color: var(--muet); margin: 6px 0 12px; }
 
 /* ========== CARTES / FORMULAIRES ========== */
@@ -270,7 +270,7 @@ button { font-family: inherit; color: inherit; }
     transition: 0.2s;
 }
 .toggle input:checked + .toggle-switch { background: var(--ligne, var(--or)); }
-.toggle input:checked + .toggle-switch::after { left: 23px; background: #111; }
+.toggle input:checked + .toggle-switch::after { left: 23px; background: var(--sur-ligne, #111); }
 
 /* Sélecteur segmenté (poste L60, shift) */
 .segmente {
@@ -293,7 +293,7 @@ button { font-family: inherit; color: inherit; }
     cursor: pointer;
     transition: 0.15s;
 }
-.segmente button.active { background: var(--ligne, var(--or)); color: #111; }
+.segmente button.active { background: var(--ligne, var(--or)); color: var(--sur-ligne, #111); }
 
 /* ========== BOUTONS ========== */
 .btn {
@@ -558,7 +558,7 @@ button { font-family: inherit; color: inherit; }
 .repas-countdown { font-size: 26px; font-weight: 800; margin-top: 8px; }
 .repas-countdown.passe { color: var(--ok); }
 .shift-close-btn { margin-top: 18px; padding: 12px 36px; font-size: 15px; }
-.shift-modal-box .segmente button.active { background: var(--or); }
+.shift-modal-box .segmente button.active { background: var(--or); color: #111; }
 
 /* En clair, les couleurs de ligne manquent de contraste pour du texte :
    le nom reste en noir, l'identification passe par la pastille et la bordure. */

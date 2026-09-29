@@ -4,13 +4,15 @@
 // voir js/calcul-lignes.js pour enregistrer une stratégie dédiée.
 // nomCourt : libellé de l'onglet (doit tenir sur une rangée à 4 lignes).
 // couleur  : couleur d'identification de la ligne (onglet, bandeau, carte),
-//            pour voir d'un coup d'œil sur quelle ligne on saisit.
+//            pour voir d'un coup d'œil sur quelle ligne on saisit. Reprend la
+//            couleur de l'étui du produit (PROVISOIRE : d'après d'anciens
+//            étuis, à caler sur les étuis actuels). L87 : gamme inconnue.
 
 const LIGNES = {
     l60: {
         nom: "Excellence",
         nomCourt: "Excellence",
-        couleur: "#E0A82E",
+        couleur: "#D4A63C",
         produitsParPalette: 720,
         produitsParNiveau: 120,
         produitsParBoite: 6,
@@ -21,7 +23,7 @@ const LIGNES = {
     ccg: {
         nom: "Casting Crème Gloss",
         nomCourt: "CCG",
-        couleur: "#3FA7E0",
+        couleur: "#E0307F",
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
@@ -36,7 +38,7 @@ const LIGNES = {
     l72: {
         nom: "Color Sensation",
         nomCourt: "Color S.",
-        couleur: "#C46BE8",
+        couleur: "#D42A2F",
         produitsParPalette: 1260,
         produitsParNiveau: 210,
         produitsParBoite: 6,

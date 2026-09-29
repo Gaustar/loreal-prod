@@ -5,6 +5,20 @@ function fmt(n) {
     return Number(n).toLocaleString('fr-FR');
 }
 
+// Texte noir ou blanc selon la clarté de la couleur de ligne (le rouge
+// Color Sensation illisible en noir, l'or illisible en blanc).
+function couleurTexteSur(hex) {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+        .map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return lum > 0.2 ? '#111111' : '#FFFFFF';
+}
+
+function poserCouleurLigne(el, couleur) {
+    el.style.setProperty('--ligne', couleur);
+    el.style.setProperty('--sur-ligne', couleurTexteSur(couleur));
+}
+
 function genererTabsEtContenus() {
     const tabsContainer = document.getElementById('tabs-container');
     const contentsContainer = document.getElementById('contents-container');
@@ -20,7 +34,7 @@ function genererTabsEtContenus() {
 
         const tabBtn = document.createElement('button');
         tabBtn.className = `tab ${ligneId}`;
-        tabBtn.style.setProperty('--ligne', config.couleur);
+        poserCouleurLigne(tabBtn, config.couleur);
         if (estActive) tabBtn.classList.add('active');
         tabBtn.innerHTML = `<span class="tab-pastille"></span>${config.nomCourt || config.nom}`;
         tabBtn.onclick = () => switchTab(ligneId);
@@ -29,7 +43,7 @@ function genererTabsEtContenus() {
         const contentDiv = document.createElement('div');
         contentDiv.id = ligneId;
         contentDiv.className = 'content';
-        contentDiv.style.setProperty('--ligne', config.couleur);
+        poserCouleurLigne(contentDiv, config.couleur);
         if (estActive) contentDiv.classList.add('active');
         contentDiv.innerHTML = genererHTMLLigne(ligneId);
         contentsContainer.appendChild(contentDiv);
