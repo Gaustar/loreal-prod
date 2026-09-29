@@ -3,6 +3,8 @@
 // Si une ligne a besoin d'une logique de calcul spécifique (comme l60),
 // voir js/calcul-lignes.js pour enregistrer une stratégie dédiée.
 // nomCourt : libellé de l'onglet (doit tenir sur une rangée à 4 lignes).
+// codes    : lignes physiques regroupées sous cet onglet (bandeau). Par défaut,
+//            l'identifiant en majuscules (ex : l87 → L87).
 // couleur  : couleur d'identification de la ligne (onglet, bandeau, carte),
 //            pour voir d'un coup d'œil sur quelle ligne on saisit. Reprend la
 //            couleur de l'étui actuel (relevée sur photos, sept. 2026) :
@@ -13,6 +15,7 @@ const LIGNES = {
     l60: {
         nom: "Excellence",
         nomCourt: "Excellence",
+        codes: ["L60", "L61", "L62", "L65"],
         couleur: "#D1B28A",
         produitsParPalette: 720,
         produitsParNiveau: 120,

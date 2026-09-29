@@ -73,6 +73,10 @@ function genererTabsEtContenus() {
     appliquerCouleurLigneActive();
 }
 
+function libelleCodes(codes) {
+    return (codes.length > 1 ? 'Lignes ' : 'Ligne ') + codes.join(' · ');
+}
+
 function genererHTMLLigne(ligneId) {
     const config = LIGNES[ligneId];
 
@@ -114,7 +118,7 @@ function genererHTMLLigne(ligneId) {
         <section class="hero">
             <div class="hero-entete">
                 <div class="hero-nom">
-                    <span class="hero-code">Ligne ${ligneId.toUpperCase()}</span>
+                    <span class="hero-code">${libelleCodes(config.codes || [ligneId.toUpperCase()])}</span>
                     <h2>${config.nom}</h2>
                 </div>
                 <button class="btn-icone btn-reglages" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</button>
