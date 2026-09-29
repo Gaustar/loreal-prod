@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Suivi Production L\'Oréal</string>
+    <string name="title_activity_main">Suivi Production L\'Oréal</string>
+    <string name="package_name">com.gauthier.lorealprod</string>
+    <string name="custom_url_scheme">com.gauthier.lorealprod</string>
+</resources>

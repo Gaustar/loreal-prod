@@ -1,0 +1,54 @@
+// ========== INITIALISATION ==========
+function init() {
+    genererTabsEtContenus();
+    chargerCadences();
+    chargerToutesLesDonnees();
+    chargerToutesLesCuves();
+    chargerConsommablesOptionnels();
+    initialiserPoste();
+    attacherEvenementsPoste();
+    initControleQualite();
+
+    Object.keys(LIGNES).forEach(ligne => {
+        const totalInp = document.getElementById('total-' + ligne);
+        const faitInp = document.getElementById('fait-' + ligne);
+        if (totalInp) {
+            totalInp.addEventListener('input', () => {
+                sauvegarderValeur(ligne, 'total', totalInp.value);
+                calculer(ligne);
+            });
+        }
+        if (faitInp) {
+            faitInp.addEventListener('input', () => {
+                let val = parseInt(faitInp.value);
+                if (isNaN(val)) val = 0;
+                if (val < 0) val = 0;
+                faitInp.value = val;
+                sauvegarderValeur(ligne, 'fait', val);
+                calculer(ligne);
+            });
+        }
+        calculer(ligne);
+    });
+
+    document.getElementById('modal-reglages').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-reglages') fermerReglagesLigne();
+    });
+    document.getElementById('modal-shift').addEventListener('click', (e) => {
+        if (e.target.id === 'modal-shift') fermerTimerShift();
+    });
+
+    // Le Service Worker n'a de raison d'être qu'en PWA web : dans un wrapper
+    // Capacitor, les assets sont déjà servis localement, et un SW actif en plus
+    // risquerait de resservir une version mise en cache périmée (voir cahier
+    // des charges, section 15).
+    if ('serviceWorker' in navigator && !window.Capacitor) {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+            console.log('Service Worker enregistré', reg);
+        }).catch(err => {
+            console.log('Erreur Service Worker :', err);
+        });
+    }
+}
+
+init();
