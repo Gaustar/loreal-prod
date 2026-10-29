@@ -30,6 +30,9 @@ function calculer(ligne) {
     let total = parseInt(totalInput.value) || 0;
     let fait = parseInt(faitInput.value) || 0;
 
+    // Avant les retours anticipés : la réintégration sert surtout en fin de production.
+    if (LIGNES[ligne].hasPoste) majReintegration(ligne);
+
     if (fait < 0) {
         fait = 0;
         faitInput.value = 0;

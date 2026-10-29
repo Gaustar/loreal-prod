@@ -156,6 +156,7 @@ function genererHTMLLigne(ligneId) {
         </section>
 
         <div id="resultat-${ligneId}"></div>
+        ${config.hasPoste ? `<div id="reint-${ligneId}"></div>` : ''}
 
         <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
     `;

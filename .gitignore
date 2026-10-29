@@ -5,3 +5,4 @@ android/.gradle/
 android/local.properties
 android/.idea/
 android/capacitor-cordova-android-plugins/build/
+.superpowers/

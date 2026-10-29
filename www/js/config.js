@@ -91,6 +91,21 @@ const CONDITIONNEMENT_L60 = {
     avantAlt: { icone: '📦', unite: "Boîtes d'étuis", parBoite: 230, labelBoite: 'boîtes', labelPiece: 'étuis' }
 };
 
+// Réintégration des AC (articles de conditionnement) L60, d'après la feuille
+// « Réintégration Excellence » : boîtes par niveau et niveaux d'une palette pleine.
+// Toujours arrondi à la boîte entière (tubes non entamables, étuis/notices :
+// même logique que « À prévoir »).
+const AC_L60 = {
+    arriere: [
+        { id: 'lamine',    nom: 'Tubes laminés',  icone: '🧴', parBoite: 252,  parNiveau: 4,  niveaux: 8,  labelBoite: 'boîtes' },
+        { id: 'plastique', nom: 'Tubes plastique', icone: '🧴', parBoite: 690,  parNiveau: 4,  niveaux: 10, labelBoite: 'boîtes' }
+    ],
+    avant: [
+        { id: 'etuis',   nom: 'Étuis',   icone: '📦', parBoite: 230,  parNiveau: 6,  niveaux: 6,  labelBoite: 'boîtes' },
+        { id: 'notices', nom: 'Notices', icone: '📄', parBoite: 1200, parNiveau: 15, niveaux: 12, labelBoite: 'paquets' }
+    ]
+};
+
 // Valeur de seuil cuve utilisée tant qu'aucune valeur personnalisée n'a
 // été réglée pour la ligne (voir getSeuilCuve dans calcul-lignes.js).
 const SEUIL_CUVE_DEFAUT = 50;
