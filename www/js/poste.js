@@ -12,11 +12,15 @@ function initialiserPoste() {
 }
 
 function mettreAJourBoutonsPoste() {
-    const btns = document.querySelectorAll('#poste-selector-l60 .poste-btn');
-    btns.forEach(btn => {
-        const p = btn.getAttribute('data-poste');
-        btn.classList.toggle('active', p === posteActuel);
-    });
+    const bandeau = document.getElementById('poste-bandeau-l60');
+    if (!bandeau) return;
+    const arriere = posteActuel === 'arriere';
+    bandeau.className = 'poste-bandeau ' + (arriere ? 'poste-arriere' : 'poste-avant');
+    bandeau.innerHTML = `<span class="poste-nom">${arriere ? '🔧 Poste arrière' : '📦 Poste avant'}<small>${arriere ? 'remplissage' : 'qualité'}</small></span><span class="poste-changer">Changer ⇄</span>`;
+}
+
+function basculerPoste() {
+    changerPoste(posteActuel === 'arriere' ? 'avant' : 'arriere');
 }
 
 function changerPoste(poste) {
@@ -24,13 +28,4 @@ function changerPoste(poste) {
     storageSet('l60-poste', poste);
     mettreAJourBoutonsPoste();
     calculer('l60');
-}
-
-function attacherEvenementsPoste() {
-    const selector = document.getElementById('poste-selector-l60');
-    if (selector) {
-        selector.querySelectorAll('.poste-btn').forEach(btn => {
-            btn.addEventListener('click', () => changerPoste(btn.getAttribute('data-poste')));
-        });
-    }
 }

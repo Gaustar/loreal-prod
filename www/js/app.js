@@ -7,9 +7,9 @@ function init() {
     chargerToutesLesCuves();
     chargerConsommablesOptionnels();
     initialiserPoste();
-    attacherEvenementsPoste();
     initControleQualite();
     initPause();
+    initAnticiper();
 
     Object.keys(LIGNES).forEach(ligne => {
         const totalInp = document.getElementById('total-' + ligne);

@@ -11,6 +11,7 @@ let acEntamee = null;            // { id, niv, boites }
 let acDernierAjout = null;       // id de l'AC
 let changementOuvert = false;
 let acQuiChangent = {};          // id → true
+let reintOuvert = false;
 
 function lireAC(id) {
     try {
@@ -60,18 +61,20 @@ function majReintegration(ligne) {
     if (!div) return;
     const objectif = objectifEnCours(ligne);
 
-    let html = '<section class="card reint"><div class="section-titre">↩️ Réintégration AC</div>';
+    let html = '';
+    const resume = [];
     acDuPoste().forEach(ac => {
         const etat = lireAC(ac.id);
         const recu = etat.palettes.reduce((s, q) => s + q, 0);
         const besoin = etat.objectifsPasses + objectif;
         const r = calculReintegration(ac, recu, besoin);
         const pleine = quantitePalette(ac, ac.niveaux, 0);
+        if (recu && besoin) resume.push(`${ac.nom} : ${r.manque ? '<span class="reint-manque">encore ' + fmt(r.manque) + ' à recevoir</span>' : 'renvoyer <b>' + fmt(r.renvoyer) + '</b>'}`);
 
         let resultat;
         if (!recu) resultat = '<div class="reint-detail">Aucune palette reçue</div>';
         else if (!besoin) resultat = '<div class="reint-detail">Saisis l\'objectif pour le calcul</div>';
-        else if (r.manque) resultat = `<div class="reint-chiffre"><span>Manque</span><b class="reint-manque">${fmt(r.manque)}</b></div>`;
+        else if (r.manque) resultat = `<div class="reint-chiffre"><span>Encore à recevoir</span><b class="reint-manque">${fmt(r.manque)}</b></div>`;
         else resultat = `
             <div class="reint-chiffre"><span>À renvoyer</span><b>${fmt(r.renvoyer)}</b></div>
             <div class="reint-detail">${r.boites ? enNiveaux(ac, r.boites) + ' · ' : ''}garder ${fmt(r.garder / ac.parBoite)} ${ac.labelBoite}</div>`;
@@ -96,8 +99,15 @@ function majReintegration(ligne) {
 
     html += changementOuvert ? htmlChangement(ligne, objectif)
         : `<button class="btn reint-btn reint-btn-2 reint-changement" onclick="basculerChangement('${ligne}')">🔄 Changement de commande</button>`;
-    html += '</section>';
-    div.innerHTML = html;
+    // Replié par défaut : le titre donne déjà les chiffres à renvoyer.
+    div.innerHTML = `
+        <details class="card reint" ${reintOuvert ? 'open' : ''} ontoggle="reintOuvert = this.open">
+            <summary class="reint-titre">
+                <span>↩️ Réintégration AC</span>
+                <span class="reint-resume">${resume.length ? resume.join('<br>') : 'Ajoute les palettes reçues'}</span>
+            </summary>
+            ${html}
+        </details>`;
 }
 
 function htmlEntamee(ligne, ac) {
@@ -206,7 +216,19 @@ function validerChangement(ligne, objectif) {
     document.getElementById('total-' + ligne).value = '';
     document.getElementById('fait-' + ligne).value = '0';
     effacerSauvegardeLigne(ligne);
+
+    // Si la file d'attente (⚙️ Réglages) a une commande, elle devient l'objectif.
+    const file = chargerCommandes(ligne);
+    if (file.length) {
+        const prochaine = file.shift();
+        document.getElementById('total-' + ligne).value = prochaine.quantite;
+        sauvegarderValeur(ligne, 'total', prochaine.quantite);
+        sauvegarderCommandes(ligne, file);
+        calculer(ligne);
+        afficherAlerteTemporaire('▶ Commande chargée : ' + fmt(prochaine.quantite) + ' pièces');
+        return;
+    }
     calculer(ligne);
-    document.getElementById('total-' + ligne).focus();
+    ouvrirCommande(ligne);
     afficherAlerteTemporaire('🔄 Nouvelle commande : saisis l\'objectif');
 }

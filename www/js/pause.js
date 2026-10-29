@@ -21,6 +21,7 @@ function lancerPause(minutes) {
     storageSet('pause-duree', minutes);
     storageRemove('pause-alerte');
     majPause();
+    majAnticiper();
 }
 
 function arreterPause() {
@@ -28,6 +29,7 @@ function arreterPause() {
     storageRemove('pause-duree');
     storageRemove('pause-alerte');
     majPause();
+    majAnticiper();
 }
 
 function formatMinSec(sec) {

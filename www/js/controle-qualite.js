@@ -52,6 +52,7 @@ function validerControle(ligne) {
     if (!periode) return;
     storageSet(`${ligne}-controle-fait-periode`, periode.periodeDebut.toISOString());
     majFabControle();
+    majAnticiper();
 }
 
 function majFabControle() {

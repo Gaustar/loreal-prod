@@ -13,7 +13,7 @@
         try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; }
         catch (e) { document.documentElement.dataset.theme = 'dark'; }
     </script>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20">
 </head>
 <body>
 
@@ -141,18 +141,19 @@
     Ordre de chargement important : chaque fichier dépend des constantes/fonctions
     définies dans les précédents (pas de bundler, scripts classiques).
 -->
-<script src="js/config.js"></script>
-<script src="js/storage.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/cadence.js"></script>
-<script src="js/poste.js"></script>
-<script src="js/calcul-lignes.js"></script>
-<script src="js/reintegration.js"></script>
-<script src="js/commandes.js"></script>
-<script src="js/shift-timer.js"></script>
-<script src="js/pause.js"></script>
-<script src="js/controle-qualite.js"></script>
-<script src="js/reglages.js"></script>
-<script src="js/app.js"></script>
+<script src="js/config.js?v=20"></script>
+<script src="js/storage.js?v=20"></script>
+<script src="js/ui.js?v=20"></script>
+<script src="js/cadence.js?v=20"></script>
+<script src="js/poste.js?v=20"></script>
+<script src="js/calcul-lignes.js?v=20"></script>
+<script src="js/reintegration.js?v=20"></script>
+<script src="js/commandes.js?v=20"></script>
+<script src="js/shift-timer.js?v=20"></script>
+<script src="js/pause.js?v=20"></script>
+<script src="js/controle-qualite.js?v=20"></script>
+<script src="js/anticiper.js?v=20"></script>
+<script src="js/reglages.js?v=20"></script>
+<script src="js/app.js?v=20"></script>
 </body>
 </html>

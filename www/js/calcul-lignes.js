@@ -39,11 +39,13 @@ function calculer(ligne) {
         sauvegarderValeur(ligne, 'fait', 0);
     }
 
+    majResumeCommande(ligne, total);
     if (total <= 0) {
-        kpiDiv.innerHTML = '<div class="kpi-message kpi-attente">⚠️ Veuillez renseigner la quantité totale à produire</div>';
+        kpiDiv.innerHTML = `<button class="kpi-message kpi-attente" onclick="ouvrirCommande('${ligne}')">Saisis l'objectif de la commande pour démarrer</button>`;
         resDiv.innerHTML = '';
         majProgression(ligne, fait, 0);
         totalInput.classList.add('total-obligatoire');
+        document.getElementById('commande-' + ligne).open = true;
         return;
     } else {
         totalInput.classList.remove('total-obligatoire');
@@ -73,7 +75,7 @@ function calculer(ligne) {
     }
 
     if (reste === 0) {
-        kpiDiv.innerHTML = '<div class="kpi-message kpi-termine">✅ PRODUCTION TERMINÉE</div>';
+        kpiDiv.innerHTML = '<div class="kpi-message kpi-termine">✅ Production terminée</div>';
         resDiv.innerHTML = '';
         return;
     }
@@ -117,10 +119,23 @@ function majProgression(ligne, fait, total) {
     const pourcent = total > 0 ? Math.min(100, (fait / total) * 100) : 0;
     const txt = document.getElementById('progress-text-' + ligne);
     const qte = document.getElementById('progress-qte-' + ligne);
-    const fill = document.getElementById('progress-fill-' + ligne);
+    const anneau = document.getElementById('anneau-' + ligne);
     if (txt) txt.innerText = pourcent.toFixed(1).replace('.', ',') + ' %';
-    if (qte) qte.innerText = `${fmt(fait)} / ${total > 0 ? fmt(total) : '—'}`;
-    if (fill) fill.style.width = pourcent + '%';
+    if (qte) qte.innerText = `${fmt(fait)} / ${total > 0 ? fmt(total) : '—'} pièces`;
+    if (anneau) anneau.style.setProperty('--pct', pourcent);
+}
+
+// Zone « Commande » repliée : son titre rappelle l'objectif pour ne pas avoir à l'ouvrir.
+function majResumeCommande(ligne, total) {
+    const el = document.getElementById('commande-resume-' + ligne);
+    if (el) el.innerText = total > 0 ? 'objectif ' + fmt(total) : 'objectif à saisir';
+}
+
+function ouvrirCommande(ligne) {
+    const details = document.getElementById('commande-' + ligne);
+    details.open = true;
+    details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('total-' + ligne).focus({ preventScroll: true });
 }
 
 // Limitation par la cuve de colorant (toute ligne ayant un colorant configuré).
@@ -154,25 +169,19 @@ function calculerCuve(ligne, reste) {
 // - un duo "Reste / Fin prévue" en tête (dans le bandeau de la ligne)
 // - une checklist "À prévoir" pour les consommables, visuellement secondaire
 
+// Héros : l'heure de fin en très gros, le reste dessous (l'anneau est à gauche).
 function renderEnTete(reste, h, m, fin, limite) {
     return `
-        <div class="kpi-grille">
-            <div class="kpi">
-                <div class="kpi-label">🎯 Reste</div>
-                <div class="kpi-valeur">${fmt(reste)}</div>
-                <div class="kpi-unite">pièces</div>
-            </div>
-            <div class="kpi">
-                <div class="kpi-label">⏱ Fin prévue${limite ? ' *' : ''}</div>
-                <div class="kpi-valeur${limite ? ' valeur-limite' : ''}">${fin}</div>
-                <div class="kpi-unite">dans ${h}h${String(m).padStart(2, '0')}</div>
-            </div>
-        </div>
+        <div class="kpi-label">Fin prévue${limite ? ' *' : ''}</div>
+        <div class="kpi-fin${limite ? ' valeur-limite' : ''}">${fin}</div>
+        <div class="kpi-unite">dans ${h}h${String(m).padStart(2, '0')}</div>
+        <div class="kpi-label kpi-label-reste">Reste</div>
+        <div class="kpi-reste">${fmt(reste)} <small>pièces</small></div>
     `;
 }
 
 function renderAPrevoir(items) {
-    let html = '<section class="card apprevoir"><div class="section-titre">🧰 À prévoir</div>';
+    let html = '<div class="apprevoir">';
     items.forEach(it => {
         html += `
             <div class="apprevoir-ligne">
@@ -181,7 +190,7 @@ function renderAPrevoir(items) {
                 <span class="apprevoir-valeur${it.limite ? ' valeur-limite' : ''}">${it.valeur}</span>
             </div>`;
     });
-    html += '</section>';
+    html += '</div>';
     return html;
 }
 

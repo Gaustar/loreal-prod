@@ -1,4 +1,4 @@
-const CACHE_NAME = 'loreal-prod-v19';   // ← changez ce chiffre à chaque mise à jour
+const CACHE_NAME = 'loreal-prod-v20';   // ← changez ce chiffre à chaque mise à jour, et le ?v= des liens dans index.html
 const urlsToCache = [
   '.',
   'index.html',
@@ -15,6 +15,9 @@ const urlsToCache = [
   'js/shift-timer.js',
   'js/pause.js',
   'js/controle-qualite.js',
+  'js/anticiper.js',
+  'fonts/barlow-condensed-600.woff2',
+  'fonts/barlow-condensed-800.woff2',
   'js/reglages.js',
   'js/app.js'
 ];
@@ -41,10 +44,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // "navigate" identifie une requête de chargement de page HTML (index.html)
-  // quel que soit le chemin d'hébergement (racine ou sous-dossier), plutôt
-  // que de comparer une URL exacte qui ne matche qu'à la racine du domaine.
-  if (event.request.mode === 'navigate') {
+  // Tout passe en réseau d'abord (cache seulement hors ligne) : en cache
+  // d'abord, le premier lancement après une mise à jour mélangeait le
+  // nouvel index.html avec les anciens JS.
+  if (event.request.method === 'GET' && new URL(event.request.url).origin === self.location.origin) {
     event.respondWith(
       fetch(event.request)
         .then(response => {

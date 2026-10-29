@@ -80,11 +80,9 @@ function libelleCodes(codes) {
 function genererHTMLLigne(ligneId) {
     const config = LIGNES[ligneId];
 
-    const posteSelectorHtml = config.hasPoste ? `
-        <div class="segmente poste-selector" id="poste-selector-${ligneId}">
-            <button class="poste-btn" data-poste="arriere">🔧 Arrière · Remplissage</button>
-            <button class="poste-btn" data-poste="avant">📦 Avant · Qualité</button>
-        </div>` : '';
+    // Bandeau de poste toujours visible : on ne doit jamais se tromper de poste.
+    const posteBandeauHtml = config.hasPoste ? `
+        <button class="poste-bandeau" id="poste-bandeau-${ligneId}" onclick="basculerPoste()"></button>` : '';
 
     const cuveHtml = config.colorant ? `
         <div class="bloc-option">
@@ -115,6 +113,7 @@ function genererHTMLLigne(ligneId) {
         </div>` : '';
 
     return `
+        ${posteBandeauHtml}
         <section class="hero">
             <div class="hero-entete">
                 <div class="hero-nom">
@@ -123,14 +122,13 @@ function genererHTMLLigne(ligneId) {
                 </div>
                 <button class="btn-icone btn-reglages" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</button>
             </div>
-            <div id="kpi-${ligneId}"></div>
-            <div class="progression">
-                <div class="progression-texte">
-                    <span id="progress-qte-${ligneId}">0 / —</span>
-                    <span id="progress-text-${ligneId}">0,0 %</span>
+            <div class="hero-corps">
+                <div class="anneau" id="anneau-${ligneId}">
+                    <span class="anneau-pct" id="progress-text-${ligneId}">0 %</span>
                 </div>
-                <div class="barre"><div id="progress-fill-${ligneId}" class="barre-fill"></div></div>
+                <div class="hero-chiffres" id="kpi-${ligneId}"></div>
             </div>
+            <div class="hero-qte" id="progress-qte-${ligneId}">0 / —</div>
         </section>
 
         <div class="palette-stepper">
@@ -139,8 +137,18 @@ function genererHTMLLigne(ligneId) {
         </div>
         <div class="palette-info">1 palette = ${fmt(config.produitsParPalette)} pièces</div>
 
-        <section class="card">
-            ${posteSelectorHtml}
+        <section class="card anticiper">
+            <h3 class="section-titre">🔭 À anticiper</h3>
+            <div id="anticiper-temps-${ligneId}"></div>
+            <div id="resultat-${ligneId}"></div>
+        </section>
+        ${config.hasPoste ? `<div id="reint-${ligneId}"></div>` : ''}
+
+        <details class="card commande" id="commande-${ligneId}">
+            <summary class="commande-titre">
+                <span>⚙️ Commande</span>
+                <span class="commande-resume" id="commande-resume-${ligneId}"></span>
+            </summary>
             <div class="saisie-grille">
                 <div>
                     <label class="form-label" for="total-${ligneId}">Objectif</label>
@@ -153,12 +161,8 @@ function genererHTMLLigne(ligneId) {
             </div>
             ${cuveHtml}
             ${consoHtml}
-        </section>
-
-        <div id="resultat-${ligneId}"></div>
-        ${config.hasPoste ? `<div id="reint-${ligneId}"></div>` : ''}
-
-        <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
+            <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
+        </details>
     `;
 }
 

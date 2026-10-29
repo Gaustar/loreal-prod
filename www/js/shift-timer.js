@@ -118,11 +118,13 @@ function toggleRepas() {
     storageSet('repas-actif', actif);
     document.getElementById('repas-config').classList.toggle('visible', actif);
     majTimerRepas();
+    majAnticiper();
 }
 
 function sauverHeureRepas() {
     storageSet('repas-heure', document.getElementById('repas-heure').value);
     majTimerRepas();
+    majAnticiper();
 }
 
 function majTimerRepas() {
