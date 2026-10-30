@@ -149,6 +149,15 @@ function htmlChangement(ligne, objectif) {
         </div>`;
 }
 
+// Vide les AC des deux postes (bouton « Réinitialiser la ligne »).
+function reinitialiserAC() {
+    [...AC_L60.arriere, ...AC_L60.avant].forEach(ac => storageRemove('l60-ac-' + ac.id));
+    acEntamee = null;
+    acDernierAjout = null;
+    changementOuvert = false;
+    acQuiChangent = {};
+}
+
 function ajouterPaletteAC(ligne, id, qte) {
     if (!qte) return;
     const etat = lireAC(id);

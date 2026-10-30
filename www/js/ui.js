@@ -237,8 +237,12 @@ function demanderConfirmation({ titre, message, libelleOk, onOk }) {
 function demanderReinitialisation(ligne) {
     demanderConfirmation({
         titre: `Réinitialiser ${LIGNES[ligne].nom} ?`,
-        message: "L'objectif, la quantité produite et la cuve de cette ligne seront effacés.",
+        message: LIGNES[ligne].hasPoste
+            ? "L'objectif, la quantité produite, la cuve et les palettes d'AC reçues (réintégration) de cette ligne seront effacés."
+            : "L'objectif, la quantité produite et la cuve de cette ligne seront effacés.",
         libelleOk: 'Réinitialiser',
-        onOk: () => reinitialiser(ligne)
+        // Les AC ne sont vidés qu'ici : commandeSuivante() appelle aussi
+        // reinitialiser() et doit garder le stock des AC qui continuent.
+        onOk: () => { if (LIGNES[ligne].hasPoste) reinitialiserAC(); reinitialiser(ligne); }
     });
 }
