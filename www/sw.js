@@ -1,4 +1,4 @@
-const CACHE_NAME = 'loreal-prod-v21';   // ← changez ce chiffre à chaque mise à jour, et le ?v= des liens dans index.html
+const CACHE_NAME = 'loreal-prod-v22';   // ← changez ce chiffre à chaque mise à jour, et le ?v= des liens dans index.html
 const urlsToCache = [
   '.',
   'index.html',
@@ -57,7 +57,8 @@ self.addEventListener('fetch', event => {
           });
           return response;
         })
-        .catch(() => caches.match(event.request))
+        // ignoreSearch : la page demande app.js?v=N, le précache contient app.js
+        .catch(() => caches.match(event.request, { ignoreSearch: true }))
     );
   } else {
     event.respondWith(

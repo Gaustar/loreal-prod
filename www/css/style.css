@@ -89,8 +89,8 @@ button { font-family: inherit; color: inherit; }
 
 .tabs {
     display: flex;
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 4px;
+    padding: 8px;
     background: var(--surface);
     border-bottom: 1px solid var(--bordure);
     position: sticky;
@@ -100,7 +100,7 @@ button { font-family: inherit; color: inherit; }
 .tab {
     flex: 1;
     min-width: 0;
-    padding: 11px 4px;
+    padding: 11px 2px;
     border: 2px solid transparent;
     border-radius: 12px;
     background: var(--surface-2);
@@ -128,7 +128,9 @@ button { font-family: inherit; color: inherit; }
     border-color: var(--ligne);
     color: var(--sur-ligne);
 }
-.tab.active .tab-pastille { background: var(--sur-ligne); }
+@media (max-width: 340px) { .tab { font-size: 12px; } }
+/* L'onglet actif est déjà en couleur : sans pastille, « Excellence » tient en entier */
+.tab.active .tab-pastille { display: none; }
 
 .content { display: none; padding: 14px 14px 0; animation: fadeIn 0.2s; }
 .content.active { display: block; }
@@ -175,7 +177,7 @@ button { font-family: inherit; color: inherit; }
 .hero-corps { display: flex; align-items: center; gap: 16px; }
 .anneau {
     --pct: 0;
-    width: 128px; height: 128px;
+    width: clamp(96px, 32vw, 128px); height: clamp(96px, 32vw, 128px);
     flex-shrink: 0;
     border-radius: 50%;
     background: conic-gradient(var(--ligne) calc(var(--pct) * 1%), var(--surface-2) 0);
@@ -196,7 +198,7 @@ button { font-family: inherit; color: inherit; }
     position: relative;
     font-family: var(--police-chiffres);
     font-weight: 800;
-    font-size: 30px;
+    font-size: clamp(22px, 7.5vw, 30px);
     color: var(--ligne-texte);
 }
 .hero-chiffres { flex: 1; min-width: 0; }
@@ -205,7 +207,7 @@ button { font-family: inherit; color: inherit; }
 .kpi-fin {
     font-family: var(--police-chiffres);
     font-weight: 800;
-    font-size: 58px;
+    font-size: clamp(40px, 14vw, 58px);
     line-height: 0.95;
     letter-spacing: -0.5px;
 }
@@ -685,4 +687,5 @@ details.reint > summary::after { order: 2; }
    le nom reste en noir, l'identification passe par la pastille et la bordure. */
 :root[data-theme="light"] .hero-nom h2,
 :root[data-theme="light"] .anneau-pct,
-:root[data-theme="light"] .reint-resume b { color: var(--texte); }
+:root[data-theme="light"] .reint-resume b,
+:root[data-theme="light"] .reint-chiffre b:not(.reint-manque) { color: var(--texte); }

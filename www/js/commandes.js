@@ -98,6 +98,9 @@ function commandeSuivante(ligne) {
 
     const charger = () => {
         const prochaine = liste.shift();
+        // Les AC ne changent pas ici : leur stock sert à la commande suivante,
+        // il faut donc compter l'objectif qui vient d'être fait.
+        if (LIGNES[ligne].hasPoste) cumulerObjectifAC(total);
         reinitialiser(ligne);
         totalInput.value = prochaine.quantite;
         sauvegarderValeur(ligne, 'total', prochaine.quantite);

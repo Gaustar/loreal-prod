@@ -149,6 +149,16 @@ function htmlChangement(ligne, objectif) {
         </div>`;
 }
 
+// « Commande suivante » (Réglages) : les AC en stock continuent, on cumule l'objectif fait.
+function cumulerObjectifAC(objectif) {
+    [...AC_L60.arriere, ...AC_L60.avant].forEach(ac => {
+        const etat = lireAC(ac.id);
+        if (!etat.palettes.length) return;
+        etat.objectifsPasses += objectif;
+        ecrireAC(ac.id, etat);
+    });
+}
+
 // Vide les AC des deux postes (bouton « Réinitialiser la ligne »).
 function reinitialiserAC() {
     [...AC_L60.arriere, ...AC_L60.avant].forEach(ac => storageRemove('l60-ac-' + ac.id));

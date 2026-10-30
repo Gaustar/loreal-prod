@@ -3,7 +3,8 @@ const fs = require('fs');
 const vm = require('vm');
 const assert = require('assert');
 
-const ctx = { storageGet: () => '', storageSet: () => {} };
+const store = {};
+const ctx = { storageGet: (k, d) => (k in store ? store[k] : d), storageSet: (k, v) => { store[k] = String(v); } };
 vm.createContext(ctx);
 for (const f of ['config.js', 'reintegration.js']) {
     vm.runInContext(fs.readFileSync(__dirname + '/../www/js/' + f, 'utf8'), ctx);
@@ -25,5 +26,13 @@ assert.strictEqual(calculReintegration(lamine, 8064, 19000).manque, 10936);
 // Pile une boîte : rien à renvoyer
 assert.strictEqual(calculReintegration(lamine, 252, 252).renvoyer, 0);
 assert.strictEqual(enNiveaux(lamine, 1), '1 boîte');
+
+// « Commande suivante » : 19 000 faits puis 5 000 avec le même stock → renvoyer 504, pas 19 656
+vm.runInContext("ecrireAC('lamine', { palettes: [24696], objectifsPasses: 0 }); cumulerObjectifAC(19000);", ctx);
+const etat = vm.runInContext("lireAC('lamine')", ctx);
+assert.strictEqual(etat.objectifsPasses, 19000);
+assert.strictEqual(calculReintegration(lamine, 24696, etat.objectifsPasses + 5000).renvoyer, 504);
+// Un AC sans palette reçue ne cumule rien
+assert.strictEqual(vm.runInContext("lireAC('notices').objectifsPasses", ctx), 0);
 
 console.log('OK');
