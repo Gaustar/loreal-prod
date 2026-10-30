@@ -102,7 +102,8 @@ const AC_L60 = {
     ],
     avant: [
         { id: 'etuis',   nom: 'Étuis',   icone: '📦', parBoite: 230,  parNiveau: 6,  niveaux: 6,  labelBoite: 'boîtes' },
-        { id: 'notices', nom: 'Notices', icone: '📄', parBoite: 1200, parNiveau: 15, niveaux: 12, labelBoite: 'paquets' }
+        // saisieLibre : palette entamée saisie en nombre de notices (trop long à compter en paquets)
+        { id: 'notices', nom: 'Notices', icone: '📄', parBoite: 1200, parNiveau: 15, niveaux: 12, labelBoite: 'paquets', saisieLibre: true }
     ]
 };
 

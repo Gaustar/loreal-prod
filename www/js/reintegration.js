@@ -77,7 +77,7 @@ function majReintegration(ligne) {
         else if (r.manque) resultat = `<div class="reint-chiffre"><span>Encore à recevoir</span><b class="reint-manque">${fmt(r.manque)}</b></div>`;
         else resultat = `
             <div class="reint-chiffre"><span>À renvoyer</span><b>${fmt(r.renvoyer)}</b></div>
-            <div class="reint-detail">${r.boites ? enNiveaux(ac, r.boites) + ' · ' : ''}garder ${fmt(r.garder / ac.parBoite)} ${ac.labelBoite}</div>`;
+            <div class="reint-detail">${r.boites ? enNiveaux(ac, r.boites) : ''}${r.renvoyer % ac.parBoite ? (r.boites ? ' + ' : '') + fmt(r.renvoyer % ac.parBoite) + ' ' + ac.nom.toLowerCase() + ' en vrac' : ''}${r.renvoyer ? ' · ' : ''}garder ${fmt(r.garder / ac.parBoite)} ${ac.labelBoite}</div>`;
 
         const listePalettes = etat.palettes.map((q, i) =>
             `<button class="reint-pal" onclick="retirerPaletteAC('${ligne}', '${ac.id}', ${i})">${fmt(q)} ✕</button>`).join('');
@@ -90,7 +90,7 @@ function majReintegration(ligne) {
                 ${resultat}
                 <div class="reint-actions">
                     <button class="btn reint-btn" onclick="ajouterPaletteAC('${ligne}', '${ac.id}', ${pleine})">+ Complète <small>${fmt(pleine)}</small></button>
-                    <button class="btn reint-btn reint-btn-2" onclick="ouvrirEntamee('${ligne}', '${ac.id}')">+ Entamée</button>
+                    <button class="btn reint-btn reint-btn-2" onclick="ouvrirEntamee('${ligne}', '${ac.id}')">${ac.saisieLibre ? '+ Quantité' : '+ Entamée'}</button>
                 </div>
                 ${acEntamee && acEntamee.id === ac.id ? htmlEntamee(ligne, ac) : ''}
                 ${acDernierAjout === ac.id ? `<div class="reint-annuler">✓ Palette ajoutée · <button class="lien-discret" onclick="annulerDernierAC('${ligne}')">Annuler</button></div>` : ''}
@@ -111,6 +111,15 @@ function majReintegration(ligne) {
 }
 
 function htmlEntamee(ligne, ac) {
+    if (ac.saisieLibre) return `
+        <div class="reint-entamee">
+            <label class="form-label" for="reint-qte-${ac.id}">Nombre de ${ac.nom.toLowerCase()} reçues</label>
+            <input type="number" id="reint-qte-${ac.id}" class="form-input" min="1" step="1" inputmode="numeric" placeholder="Ex : 52 800">
+            <div class="reint-actions">
+                <button class="btn reint-btn reint-btn-2" onclick="ouvrirEntamee('${ligne}', null)">Fermer</button>
+                <button class="btn reint-btn" onclick="ajouterQuantiteAC('${ligne}', '${ac.id}')">Ajouter</button>
+            </div>
+        </div>`;
     const stepper = (champ, val, label) => `
         <div class="reint-step"><span>${label}</span>
             <span class="reint-step-btns">
@@ -176,6 +185,15 @@ function ajouterPaletteAC(ligne, id, qte) {
     acEntamee = null;
     acDernierAjout = id;
     majReintegration(ligne);
+}
+
+function ajouterQuantiteAC(ligne, id) {
+    const qte = parseInt(document.getElementById('reint-qte-' + id).value);
+    if (!(qte > 0)) {
+        afficherAlerteTemporaire('⚠️ Quantité invalide');
+        return;
+    }
+    ajouterPaletteAC(ligne, id, qte);
 }
 
 function annulerDernierAC(ligne) {
