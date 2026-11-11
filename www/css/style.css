@@ -136,85 +136,7 @@ button { font-family: inherit; color: inherit; }
 .content.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* ========== BANDEAU DE LIGNE (nom + reste/fin + progression) ========== */
-.hero {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border: 1px solid var(--bordure);
-    border-left: 8px solid var(--ligne);
-    box-shadow: var(--ombre);
-}
-.hero-entete {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 14px;
-}
-.hero-code {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--sur-ligne);
-    background: var(--ligne);
-    padding: 3px 9px;
-    border-radius: 6px;
-}
-.hero-nom h2 {
-    font-size: 26px;
-    font-weight: 800;
-    line-height: 1.15;
-    margin-top: 6px;
-    color: var(--ligne-texte);
-}
-
-/* Anneau de progression à gauche, heure de fin en grand à droite : le
-   seul élément « fort » de l'écran, lisible à bout de bras. */
-.hero-corps { display: flex; align-items: center; gap: 16px; }
-.anneau {
-    --pct: 0;
-    width: clamp(96px, 32vw, 128px); height: clamp(96px, 32vw, 128px);
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: conic-gradient(var(--ligne) calc(var(--pct) * 1%), var(--surface-2) 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    transition: background 0.4s;
-}
-.anneau::before {
-    content: '';
-    position: absolute;
-    inset: 13px;
-    border-radius: 50%;
-    background: var(--surface);
-}
-.anneau-pct {
-    position: relative;
-    font-family: var(--police-chiffres);
-    font-weight: 800;
-    font-size: clamp(22px, 7.5vw, 30px);
-    color: var(--ligne-texte);
-}
-.hero-chiffres { flex: 1; min-width: 0; }
-.kpi-label { font-size: 13px; font-weight: 600; color: var(--muet); }
-.kpi-label-reste { margin-top: 8px; }
-.kpi-fin {
-    font-family: var(--police-chiffres);
-    font-weight: 800;
-    font-size: clamp(40px, 14vw, 58px);
-    line-height: 0.95;
-    letter-spacing: -0.5px;
-}
-.kpi-unite { font-size: 13px; color: var(--texte-2); }
-.kpi-reste { font-family: var(--police-chiffres); font-weight: 600; font-size: 30px; line-height: 1.05; }
-.kpi-reste small { font-family: inherit; font-size: 15px; color: var(--muet); }
-.hero-qte { margin-top: 12px; text-align: center; font-size: 15px; font-weight: 700; color: var(--texte-2); }
+/* ========== MESSAGE D'ÉTAT (production terminée) ========== */
 .kpi-message {
     width: 100%;
     padding: 16px 12px;
@@ -225,7 +147,6 @@ button { font-family: inherit; color: inherit; }
     background: var(--surface-2);
 }
 button.kpi-message { cursor: pointer; }
-.kpi-attente { color: var(--attention); font-size: 15px; }
 .kpi-termine { color: var(--ok); font-size: 20px; }
 
 /* Bandeau de poste : couleur pleine propre au poste, jamais confondue
@@ -265,18 +186,21 @@ details.card > summary {
 }
 details.card > summary::-webkit-details-marker { display: none; }
 details.card > summary::after { content: '▾'; color: var(--muet); transition: transform 0.2s; }
+/* La commande repliée tient en une ligne : « Commande 14 400 pièces [Modifier] » */
+details.commande > summary { align-items: center; }
+details.commande > summary::after { content: 'Modifier'; font-size: 13px; font-weight: 700; color: var(--ligne-texte); border: 1px solid currentColor; border-radius: 10px; padding: 5px 10px; }
+details.card.commande[open] > summary::after { content: 'Fermer'; transform: none; }
+.commande-resume { font-family: var(--police-chiffres); font-size: 22px; font-weight: 800; color: var(--texte); text-align: left; flex: 1; }
 details.card[open] > summary::after { transform: rotate(180deg); }
 details.card[open] > summary { margin-bottom: 14px; }
-.commande-resume, .reint-resume { flex: 1; text-align: right; font-size: 14px; font-weight: 600; color: var(--texte-2); }
+.reint-resume { flex: 1; font-size: 15px; font-weight: 600; color: var(--texte-2); }
 /* Le résumé de réintégration passe sous le titre (une ligne par AC) */
 details.reint > summary { flex-wrap: wrap; }
 details.reint > summary::after { order: 2; }
 .reint-resume { order: 3; flex-basis: 100%; text-align: left; line-height: 1.5; }
-.reint-resume b { color: var(--ligne-texte); }
+.reint-resume b { color: var(--ligne-texte); font-family: var(--police-chiffres); font-size: 24px; font-weight: 800; }
 .reint-resume .reint-manque { color: var(--attention); }
 .anticiper:not(:has(.apprevoir-ligne))::after { content: 'Rien à anticiper pour le moment'; display: block; font-size: 14px; color: var(--muet); }
-/* Les échéances horaires et « À prévoir » se suivent comme une seule liste */
-.anticiper [id^="anticiper-temps"] .apprevoir-ligne:last-child { border-bottom: 1px dashed var(--bordure); padding-bottom: 10px; }
 .anticiper-urgent .apprevoir-label, .anticiper-urgent .apprevoir-valeur { color: var(--attention); }
 .barre {
     height: 12px;
@@ -292,16 +216,6 @@ details.reint > summary::after { order: 2; }
     transition: width 0.4s ease-out;
 }
 .barre-fine { height: 8px; margin: 14px 0 8px; }
-
-/* ========== PALETTES ========== */
-.palette-stepper {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 10px;
-}
-.btn-palette-moins { background: var(--surface-2); color: var(--attention); border: 2px solid var(--attention); }
-.btn-palette-plus { background: var(--ligne); color: var(--sur-ligne); font-size: 20px; }
-.palette-info { text-align: center; font-size: 12px; color: var(--muet); margin: 6px 0 12px; }
 
 /* ========== CARTES / FORMULAIRES ========== */
 .card {
@@ -488,7 +402,7 @@ details.reint > summary::after { order: 2; }
 .alerte-cuve-titre { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
 .alerte-cuve-valeur { font-size: 30px; font-weight: 800; margin: 4px 0; }
 .alerte-cuve-detail { font-size: 13px; font-weight: 700; }
-.note-limite { font-size: 12px; font-weight: 700; color: var(--danger); margin: -4px 4px 12px; }
+.note-limite { font-size: 12px; font-weight: 700; color: var(--danger); margin: 8px 4px 0; }
 
 /* ========== BOUTONS FLOTTANTS ========== */
 .fab {
@@ -683,9 +597,87 @@ details.reint > summary::after { order: 2; }
 .shift-close-btn { margin-top: 18px; padding: 12px 36px; font-size: 15px; }
 .shift-modal-box .segmente button.active { background: var(--or); color: #111; }
 
+
+/* ========== COMMANDE (saisie de départ) ========== */
+.etape { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ligne-texte); }
+.form-input-grand { font-family: var(--police-chiffres); font-size: 40px; font-weight: 800; padding: 10px 14px; }
+.label-suite { margin-top: 14px; }
+.btn-ligne { background: var(--ligne); color: var(--sur-ligne); }
+
+/* ========== TABLEAU DE BORD (tuiles) ==========
+   Tout ce qu'il faut savoir sur la commande en cours, sans défiler. */
+.tableau { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.tableau:empty { display: none; }
+.tableau > .kpi-message { grid-column: 1 / -1; }
+.tuile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 12px 14px;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 18px;
+    box-shadow: var(--ombre);
+}
+button.tuile { cursor: pointer; }
+button.tuile:active { transform: scale(0.97); }
+.tuile-label { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--texte-2); }
+.tuile-valeur { font-family: var(--police-chiffres); font-weight: 800; font-size: clamp(34px, 11vw, 46px); line-height: 1; }
+.tuile-detail { font-size: 13px; font-weight: 600; color: var(--texte-2); }
+/* La fin prévue est LA réponse : seule tuile pleine couleur. */
+.tuile-fin { background: var(--ligne); border-color: var(--ligne); color: var(--sur-ligne); }
+.tuile-fin .tuile-label, .tuile-fin .tuile-detail { color: inherit; }
+.tuile-fin .tuile-valeur { font-size: clamp(46px, 15vw, 60px); }
+.tuile-large { grid-column: 1 / -1; }
+.tuile-vide .tuile-valeur { color: var(--muet); }
+.tuile-ok .tuile-valeur { color: var(--ok); }
+.tuile-alerte { border: 2px solid var(--danger); background: var(--danger-fond); }
+.tuile-alerte .tuile-valeur, .tuile-alerte .tuile-label { color: var(--danger); }
+
+.aprevoir:not(:has(.apprevoir-ligne)) { display: none; }
+
+/* ========== DOCK PALETTES (fixé en bas) ========== */
+:root { --dock-h: 140px; --largeur: 560px; }
+body { padding-bottom: calc(var(--dock-h) + 20px + env(safe-area-inset-bottom)); }
+.dock {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: min(100%, var(--largeur));
+    height: calc(var(--dock-h) + env(safe-area-inset-bottom));
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--bordure);
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.25);
+    z-index: 900;
+}
+/* Le minuteur (gauche) et le contrôle qualité (droite) se logent de part et d'autre */
+.dock-info { height: 42px; padding: 0 78px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; color: var(--texte-2); }
+.dock-info b { font-family: var(--police-chiffres); font-size: 20px; font-weight: 800; color: var(--texte); }
+.barre-dock { height: 6px; margin: 6px 0 8px; }
+.palette-stepper { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.palette-stepper .btn { padding: 0; height: 58px; }
+.btn-palette-moins { background: var(--surface-2); color: var(--attention); border: 2px solid var(--attention); }
+.btn-palette-plus { background: var(--ligne); color: var(--sur-ligne); font-size: 20px; }
+/* Minuteur et contrôle qualité : pastilles posées dans le dock, plus rien ne flotte sur le contenu */
+.fab { bottom: calc(var(--dock-h) - 52px + env(safe-area-inset-bottom)); height: 42px; min-width: 42px; font-size: 20px; box-shadow: none; }
+.fab-timer { left: max(14px, calc(50vw - var(--largeur) / 2 + 14px)); }
+.fab-timer.fab-pause, .fab-controle { font-size: 15px; }
+.fab-controle { left: auto; right: max(14px, calc(50vw - var(--largeur) / 2 + 14px)); transform: none; }
+.fab-controle:active { transform: scale(0.92); }
+.toast { bottom: calc(var(--dock-h) + 12px + env(safe-area-inset-bottom)); max-width: calc(var(--largeur) - 40px); margin: 0 auto; }
+
+/* ========== GRAND ÉCRAN (PC) : colonne centrée, largeur d'un téléphone ========== */
+.topbar-actions { display: flex; gap: 8px; }
+main { max-width: var(--largeur); margin: 0 auto; }
+.topbar, .tabs { padding-left: max(8px, calc(50vw - var(--largeur) / 2 + 8px)); padding-right: max(8px, calc(50vw - var(--largeur) / 2 + 8px)); }
+
 /* En clair, les couleurs de ligne manquent de contraste pour du texte :
-   le nom reste en noir, l'identification passe par la pastille et la bordure. */
-:root[data-theme="light"] .hero-nom h2,
-:root[data-theme="light"] .anneau-pct,
+   elles restent en fond (tuile, boutons), le texte passe en noir. */
+:root[data-theme="light"] .etape,
+:root[data-theme="light"] details.commande > summary::after,
 :root[data-theme="light"] .reint-resume b,
 :root[data-theme="light"] .reint-chiffre b:not(.reint-manque) { color: var(--texte); }

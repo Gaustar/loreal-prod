@@ -37,6 +37,8 @@ function ouvrirReglagesLigne(ligne) {
 
 function fermerReglagesLigne() {
     document.getElementById('modal-reglages').classList.remove('active');
+    // La tuile « Commande suivante » suit la file d'attente modifiée ici.
+    if (ligneReglages) calculer(ligneReglages);
     ligneReglages = null;
     commandeEnEdition = null;
 }

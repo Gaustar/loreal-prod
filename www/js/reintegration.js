@@ -11,7 +11,7 @@ let acEntamee = null;            // { id, niv, boites }
 let acDernierAjout = null;       // id de l'AC
 let changementOuvert = false;
 let acQuiChangent = {};          // id → true
-let reintOuvert = false;
+let reintOuvert = null;          // null = pas encore touché (ouvert tant que rien n'est reçu)
 
 function lireAC(id) {
     try {
@@ -99,12 +99,14 @@ function majReintegration(ligne) {
 
     html += changementOuvert ? htmlChangement(ligne, objectif)
         : `<button class="btn reint-btn reint-btn-2 reint-changement" onclick="basculerChangement('${ligne}')">🔄 Changement de commande</button>`;
-    // Replié par défaut : le titre donne déjà les chiffres à renvoyer.
+    // Replié, le titre donne les chiffres à renvoyer. Tant qu'aucune palette
+    // n'est reçue, il s'ouvre seul : c'est l'étape qui suit la quantité.
+    const aRecu = acDuPoste().some(ac => lireAC(ac.id).palettes.length);
     div.innerHTML = `
-        <details class="card reint" ${reintOuvert ? 'open' : ''} ontoggle="reintOuvert = this.open">
+        <details class="card reint" ${(reintOuvert ?? !aRecu) ? 'open' : ''} ontoggle="reintOuvert = this.open">
             <summary class="reint-titre">
-                <span>↩️ Réintégration AC</span>
-                <span class="reint-resume">${resume.length ? resume.join('<br>') : 'Ajoute les palettes reçues'}</span>
+                <span>↩️ À réintégrer</span>
+                <span class="reint-resume">${resume.length ? resume.join('<br>') : "Ajoute les palettes d'AC reçues"}</span>
             </summary>
             ${html}
         </details>`;

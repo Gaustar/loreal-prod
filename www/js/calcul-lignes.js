@@ -41,7 +41,8 @@ function calculer(ligne) {
 
     majResumeCommande(ligne, total);
     if (total <= 0) {
-        kpiDiv.innerHTML = `<button class="kpi-message kpi-attente" onclick="ouvrirCommande('${ligne}')">Saisis l'objectif de la commande pour démarrer</button>`;
+        // Pas de tableau de bord sans commande : la carte Commande, ouverte, guide la saisie.
+        kpiDiv.innerHTML = '';
         resDiv.innerHTML = '';
         majProgression(ligne, fait, 0);
         totalInput.classList.add('total-obligatoire');
@@ -89,7 +90,7 @@ function calculer(ligne) {
     const hh = Math.floor(minTot / 60);
     const mm = Math.floor(minTot % 60);
     const fin = new Date(Date.now() + minTot * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    kpiDiv.innerHTML = renderEnTete(reste, hh, mm, fin, cuve.limite);
+    kpiDiv.innerHTML = renderTableau(ligne, reste, Math.floor((fait / total) * 100), hh, mm, fin, cuve);
 
     const strategie = CALCUL_STRATEGIES[ligne] || itemsStandard;
     const items = strategie(ligne, cuve.qte, cuve.limite);
@@ -117,18 +118,16 @@ function calculer(ligne) {
 
 function majProgression(ligne, fait, total) {
     const pourcent = total > 0 ? Math.min(100, (fait / total) * 100) : 0;
-    const txt = document.getElementById('progress-text-' + ligne);
     const qte = document.getElementById('progress-qte-' + ligne);
-    const anneau = document.getElementById('anneau-' + ligne);
-    if (txt) txt.innerText = pourcent.toFixed(1).replace('.', ',') + ' %';
-    if (qte) qte.innerText = `${fmt(fait)} / ${total > 0 ? fmt(total) : '—'} pièces`;
-    if (anneau) anneau.style.setProperty('--pct', pourcent);
+    const barre = document.getElementById('barre-' + ligne);
+    if (qte) qte.innerHTML = total > 0 ? `<b>${fmt(fait)}</b> / ${fmt(total)} pièces` : 'Aucune commande en cours';
+    if (barre) barre.style.width = pourcent + '%';
 }
 
 // Zone « Commande » repliée : son titre rappelle l'objectif pour ne pas avoir à l'ouvrir.
 function majResumeCommande(ligne, total) {
     const el = document.getElementById('commande-resume-' + ligne);
-    if (el) el.innerText = total > 0 ? 'objectif ' + fmt(total) : 'objectif à saisir';
+    if (el) el.innerText = total > 0 ? fmt(total) + ' pièces' : 'à saisir';
 }
 
 function ouvrirCommande(ligne) {
@@ -166,18 +165,45 @@ function calculerCuve(ligne, reste) {
 }
 
 // ========== RENDU PARTAGÉ DES RÉSULTATS ==========
-// - un duo "Reste / Fin prévue" en tête (dans le bandeau de la ligne)
+// - un tableau de bord en tuiles (fin prévue, reste, cuve, commande suivante)
 // - une checklist "À prévoir" pour les consommables, visuellement secondaire
 
-// Héros : l'heure de fin en très gros, le reste dessous (l'anneau est à gauche).
-function renderEnTete(reste, h, m, fin, limite) {
-    return `
-        <div class="kpi-label">Fin prévue${limite ? ' *' : ''}</div>
-        <div class="kpi-fin${limite ? ' valeur-limite' : ''}">${fin}</div>
-        <div class="kpi-unite">dans ${h}h${String(m).padStart(2, '0')}</div>
-        <div class="kpi-label kpi-label-reste">Reste</div>
-        <div class="kpi-reste">${fmt(reste)} <small>pièces</small></div>
-    `;
+function dureeHM(minutes) {
+    return `${Math.floor(minutes / 60)}h${String(Math.floor(minutes % 60)).padStart(2, '0')}`;
+}
+
+// Tuiles lisibles d'un coup d'œil, sans défiler. Cuve et commande suivante
+// sont des boutons : elles ouvrent l'endroit où on les règle.
+function renderTableau(ligne, reste, pct, h, m, fin, cuve) {
+    const config = LIGNES[ligne];
+    const tuile = (label, valeur, detail, classe = '', action = '') =>
+        `<${action ? `button onclick="${action}"` : 'div'} class="tuile ${classe}">
+            <span class="tuile-label">${label}</span>
+            <span class="tuile-valeur">${valeur}</span>
+            <span class="tuile-detail">${detail}</span>
+        </${action ? 'button' : 'div'}>`;
+
+    const tuiles = [
+        tuile('Fin prévue' + (cuve.limite ? ' *' : ''), fin, `dans ${h}h${String(m).padStart(2, '0')}` + (cuve.limite ? ' · limité par la cuve' : ''), 'tuile-fin'),
+        tuile('Reste', fmt(reste), `pièces · ${pct} % fait`)
+    ];
+
+    if (config.colorant) {
+        const ouvrir = `ouvrirCommande('${ligne}')`;
+        const poids = parseFloat(document.getElementById(`poids-cuve-${ligne}`).value) || 0;
+        if (!document.getElementById(`check-cuve-${ligne}`).checked) tuiles.push(tuile('Cuve', '—', 'non suivie', 'tuile-vide', ouvrir));
+        else if (!poids) tuiles.push(tuile('Cuve', '?', 'saisis le poids', 'tuile-vide', ouvrir));
+        else if (cuve.limite) tuiles.push(tuile('Cuve ⛔', fmt(cuve.possibles), `pièces max · manque ${fmt(reste - cuve.possibles)}`, 'tuile-alerte', ouvrir));
+        else tuiles.push(tuile('Cuve', 'OK', `${fmt(poids)} kg · suffit pour finir`, 'tuile-ok', ouvrir));
+    }
+
+    const suivante = chargerCommandes(ligne)[0];
+    tuiles.push(suivante
+        ? tuile('Commande suivante', fmt(suivante.quantite), `pièces · ${dureeHM(suivante.quantite / config.vitesse)} de production`, '', `ouvrirReglagesLigne('${ligne}')`)
+        : tuile('Commande suivante', '—', "file d'attente vide", 'tuile-vide', `ouvrirReglagesLigne('${ligne}')`));
+
+    // Nombre impair de tuiles : la fin prévue prend toute la largeur.
+    return (tuiles.length % 2 ? tuiles[0].replace('tuile-fin', 'tuile-fin tuile-large') : tuiles[0]) + tuiles.slice(1).join('');
 }
 
 function renderAPrevoir(items) {

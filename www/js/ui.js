@@ -114,56 +114,57 @@ function genererHTMLLigne(ligneId) {
 
     return `
         ${posteBandeauHtml}
-        <section class="hero">
-            <div class="hero-entete">
-                <div class="hero-nom">
-                    <span class="hero-code">${libelleCodes(config.codes || [ligneId.toUpperCase()])}</span>
-                    <h2>${config.nom}</h2>
-                </div>
-                <button class="btn-icone btn-reglages" onclick="ouvrirReglagesLigne('${ligneId}')" title="Réglages">⚙️</button>
-            </div>
-            <div class="hero-corps">
-                <div class="anneau" id="anneau-${ligneId}">
-                    <span class="anneau-pct" id="progress-text-${ligneId}">0 %</span>
-                </div>
-                <div class="hero-chiffres" id="kpi-${ligneId}"></div>
-            </div>
-            <div class="hero-qte" id="progress-qte-${ligneId}">0 / —</div>
+        <!-- Ordre de travail : 1. la commande (repliée une fois saisie),
+             2. le tableau de bord, 3. la réintégration, puis les détails. -->
+        <details class="card commande" id="commande-${ligneId}">
+            <summary>
+                <span>Commande</span>
+                <span class="commande-resume" id="commande-resume-${ligneId}"></span>
+            </summary>
+            <label class="etape" for="total-${ligneId}">Quantité à réaliser</label>
+            <input type="number" id="total-${ligneId}" class="form-input form-input-grand" placeholder="Ex : 5000" min="1" step="1" inputmode="numeric">
+            <div class="reint-detail">1 palette = ${fmt(config.produitsParPalette)} pièces</div>
+            <label class="form-label label-suite" for="fait-${ligneId}">Déjà produit (si la commande est entamée)</label>
+            <input type="number" id="fait-${ligneId}" class="form-input" value="0" min="0" step="1" inputmode="numeric">
+            ${cuveHtml}
+            ${consoHtml}
+            <button class="btn btn-ligne btn-plein" onclick="demarrerCommande('${ligneId}')">▶ Démarrer la commande</button>
+            <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
+        </details>
+
+        <section class="tableau" id="kpi-${ligneId}"></section>
+        ${config.hasPoste ? `<div id="reint-${ligneId}"></div>` : ''}
+
+        <section class="card aprevoir">
+            <h3 class="section-titre">📦 À prévoir pour finir</h3>
+            <div id="resultat-${ligneId}"></div>
         </section>
-
-        <div class="palette-stepper">
-            <button class="btn btn-palette-moins" onclick="modifierPalette('${ligneId}', -1)">− Palette</button>
-            <button class="btn btn-palette-plus" onclick="modifierPalette('${ligneId}', 1)">+ Palette</button>
-        </div>
-        <div class="palette-info">1 palette = ${fmt(config.produitsParPalette)} pièces</div>
-
         <section class="card anticiper">
             <h3 class="section-titre">🔭 À anticiper</h3>
             <div id="anticiper-temps-${ligneId}"></div>
-            <div id="resultat-${ligneId}"></div>
         </section>
-        ${config.hasPoste ? `<div id="reint-${ligneId}"></div>` : ''}
 
-        <details class="card commande" id="commande-${ligneId}">
-            <summary class="commande-titre">
-                <span>⚙️ Commande</span>
-                <span class="commande-resume" id="commande-resume-${ligneId}"></span>
-            </summary>
-            <div class="saisie-grille">
-                <div>
-                    <label class="form-label" for="total-${ligneId}">Objectif</label>
-                    <input type="number" id="total-${ligneId}" class="form-input" placeholder="Ex : 5000" min="1" step="1" inputmode="numeric">
-                </div>
-                <div>
-                    <label class="form-label" for="fait-${ligneId}">Déjà produit</label>
-                    <input type="number" id="fait-${ligneId}" class="form-input" value="0" min="0" step="1" inputmode="numeric">
-                </div>
+        <!-- Fixé en bas, sous le pouce : le seul geste répété tout le poste -->
+        <div class="dock">
+            <div class="dock-info">
+                <span id="progress-qte-${ligneId}"></span>
             </div>
-            ${cuveHtml}
-            ${consoHtml}
-            <button class="lien-discret lien-danger" onclick="demanderReinitialisation('${ligneId}')">↺ Réinitialiser la ligne ${config.nomCourt || config.nom}</button>
-        </details>
+            <div class="barre barre-dock"><div class="barre-fill" id="barre-${ligneId}"></div></div>
+            <div class="palette-stepper">
+                <button class="btn btn-palette-moins" onclick="modifierPalette('${ligneId}', -1)">− Palette</button>
+                <button class="btn btn-palette-plus" onclick="modifierPalette('${ligneId}', 1)">+ Palette terminée</button>
+            </div>
+        </div>
     `;
+}
+
+function demarrerCommande(ligne) {
+    if (!(parseInt(document.getElementById('total-' + ligne).value) > 0)) {
+        afficherAlerteTemporaire("⚠️ Saisis d'abord la quantité à réaliser");
+        return;
+    }
+    document.getElementById('commande-' + ligne).open = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Le libellé de la case "Suivre la cuve" reflète le seuil réellement
@@ -189,7 +190,9 @@ function switchTab(ligneId) {
 // toujours sur quelle ligne on est, même en ayant fait défiler la page.
 function appliquerCouleurLigneActive() {
     const config = LIGNES[ligneActiveCourante];
-    if (config) document.documentElement.style.setProperty('--ligne-active', config.couleur);
+    if (!config) return;
+    document.documentElement.style.setProperty('--ligne-active', config.couleur);
+    document.getElementById('topbar-sous').innerText = libelleCodes(config.codes || [ligneActiveCourante.toUpperCase()]);
 }
 
 // ========== THÈME ==========
