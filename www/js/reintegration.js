@@ -248,6 +248,9 @@ function validerChangement(ligne, objectif) {
     acDuPoste().forEach(ac => {
         if (acQuiChangent[ac.id]) { ecrireAC(ac.id, { palettes: [], objectifsPasses: 0 }); return; }
         const etat = lireAC(ac.id);
+        // Rien en stock : rien à cumuler (sinon les palettes reçues plus tard
+        // devraient couvrir une commande déjà finie).
+        if (!etat.palettes.length) return;
         etat.objectifsPasses += objectif;
         ecrireAC(ac.id, etat);
     });
