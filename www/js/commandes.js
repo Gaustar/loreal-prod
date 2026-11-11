@@ -92,7 +92,7 @@ function commandeSuivante(ligne) {
 
     const totalInput = document.getElementById('total-' + ligne);
     const faitInput = document.getElementById('fait-' + ligne);
-    const total = parseInt(totalInput.value) || 0;
+    const total = quantiteReelle(ligne, parseInt(totalInput.value) || 0);
     const fait = parseInt(faitInput.value) || 0;
     const reste = Math.max(0, total - fait);
 

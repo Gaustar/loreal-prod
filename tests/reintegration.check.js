@@ -6,7 +6,7 @@ const assert = require('assert');
 const store = {};
 const ctx = { storageGet: (k, d) => (k in store ? store[k] : d), storageSet: (k, v) => { store[k] = String(v); } };
 vm.createContext(ctx);
-for (const f of ['config.js', 'reintegration.js']) {
+for (const f of ['config.js', 'calcul-lignes.js', 'reintegration.js']) {
     vm.runInContext(fs.readFileSync(__dirname + '/../www/js/' + f, 'utf8'), ctx);
 }
 const { calculReintegration, quantitePalette, enNiveaux } = ctx;
@@ -34,5 +34,17 @@ assert.strictEqual(etat.objectifsPasses, 19000);
 assert.strictEqual(calculReintegration(lamine, 24696, etat.objectifsPasses + 5000).renvoyer, 504);
 // Un AC sans palette reçue ne cumule rien
 assert.strictEqual(vm.runInContext("lireAC('notices').objectifsPasses", ctx), 0);
+
+// Les tubes dirigent : boîtes entières, jamais sous l'objectif
+const { quantiteReelle } = ctx;
+assert.strictEqual(quantiteReelle('l60', 19000), 19152);   // 76 boîtes de 252
+assert.strictEqual(quantiteReelle('l60', 19152), 19152);   // déjà un compte rond
+assert.strictEqual(quantiteReelle('ccg', 8280), 8316);     // 33 boîtes de 252
+assert.strictEqual(quantiteReelle('l72', 5000), 5362);     // 14 boîtes de 383
+assert.strictEqual(quantiteReelle('l87', 5000), 5000);     // pas de tubes : objectif tel quel
+assert.strictEqual(quantiteReelle('l60', 0), 0);
+// Les étuis couvrent la quantité réelle : 84 boîtes (19 320), et non 83 (19 090)
+const etuis = vm.runInContext('AC_L60.avant[0]', ctx);
+assert.strictEqual(calculReintegration(etuis, 24840, quantiteReelle('l60', 19000)).garder, 19320);
 
 console.log('OK');

@@ -599,6 +599,7 @@ details.reint > summary::after { order: 2; }
 
 
 /* ========== COMMANDE (saisie de départ) ========== */
+.commande-resume small { display: block; font-size: 14px; font-weight: 600; color: var(--texte-2); }
 .etape { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--ligne-texte); }
 .form-input-grand { font-family: var(--police-chiffres); font-size: 40px; font-weight: 800; padding: 10px 14px; }
 .label-suite { margin-top: 14px; }

@@ -5,6 +5,9 @@
 // nomCourt : libellé de l'onglet (doit tenir sur une rangée à 4 lignes).
 // codes    : lignes physiques regroupées sous cet onglet (bandeau). Par défaut,
 //            l'identifiant en majuscules (ex : l87 → L87).
+// tubesParBoite : les boîtes de tubes se consomment entièrement, elles
+//            dirigent donc la quantité réelle de la commande (voir
+//            quantiteReelle dans calcul-lignes.js).
 // couleur  : couleur d'identification de la ligne (onglet, bandeau, carte),
 //            pour voir d'un coup d'œil sur quelle ligne on saisit. Reprend la
 //            couleur de l'étui actuel (relevée sur photos, sept. 2026) :
@@ -17,6 +20,7 @@ const LIGNES = {
         nomCourt: "Excellence",
         codes: ["L60", "L61", "L62", "L65"],
         couleur: "#D1B28A",
+        tubesParBoite: 252,
         produitsParPalette: 720,
         produitsParNiveau: 120,
         produitsParBoite: 6,
@@ -28,6 +32,7 @@ const LIGNES = {
         nom: "Casting Crème Gloss",
         nomCourt: "CCG",
         couleur: "#D82D88",
+        tubesParBoite: 252,
         produitsParPalette: 828,
         produitsParNiveau: 138,
         produitsParBoite: 6,
@@ -43,6 +48,7 @@ const LIGNES = {
         nom: "Color Sensation",
         nomCourt: "Color S.",
         couleur: "#870C27",
+        tubesParBoite: 383,
         produitsParPalette: 1260,
         produitsParNiveau: 210,
         produitsParBoite: 6,

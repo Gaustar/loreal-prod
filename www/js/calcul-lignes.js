@@ -22,6 +22,14 @@ function sauvegarderSeuilCuve(ligne, valeur) {
     storageSet(`${ligne}-cuve-seuil`, valeur);
 }
 
+// Quantité réellement produite : un nombre entier de boîtes de tubes, le plus
+// petit qui atteint l'objectif (jamais en dessous). Tout le reste (fin prévue,
+// reste, étuis, notices, réintégration) se calcule sur cette quantité.
+function quantiteReelle(ligne, objectif) {
+    const parBoite = LIGNES[ligne].tubesParBoite;
+    return parBoite && objectif > 0 ? Math.ceil(objectif / parBoite) * parBoite : objectif;
+}
+
 function calculer(ligne) {
     const totalInput = document.getElementById('total-' + ligne);
     const faitInput = document.getElementById('fait-' + ligne);
@@ -52,9 +60,10 @@ function calculer(ligne) {
         totalInput.classList.remove('total-obligatoire');
     }
 
+    const cible = quantiteReelle(ligne, total);
     let correctionAppliquee = false;
-    if (fait > total) {
-        fait = total;
+    if (fait > cible) {
+        fait = cible;
         faitInput.value = fait;
         sauvegarderValeur(ligne, 'fait', fait);
         correctionAppliquee = true;
@@ -62,16 +71,16 @@ function calculer(ligne) {
 
     sauvegarderValeur(ligne, 'total', total);
     sauvegarderValeur(ligne, 'fait', fait);
-    majProgression(ligne, fait, total);
+    majProgression(ligne, fait, cible);
 
-    const reste = Math.max(0, total - fait);
+    const reste = Math.max(0, cible - fait);
 
     // Doit être évalué AVANT le court-circuit "reste === 0" : quand fait est
     // plafonné à total, reste vaut systématiquement 0, donc la notification
     // ne se déclencherait jamais si elle était placée après ce court-circuit.
     if (correctionAppliquee && !alertesCorrigeesActives[ligne]) {
         alertesCorrigeesActives[ligne] = true;
-        afficherAlerteTemporaire(`⚠️ Production plafonnée à ${fmt(total)} pièces`);
+        afficherAlerteTemporaire(`⚠️ Production plafonnée à ${fmt(cible)} pièces`);
         setTimeout(() => { alertesCorrigeesActives[ligne] = false; }, 2000);
     }
 
@@ -90,7 +99,7 @@ function calculer(ligne) {
     const hh = Math.floor(minTot / 60);
     const mm = Math.floor(minTot % 60);
     const fin = new Date(Date.now() + minTot * 60000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    kpiDiv.innerHTML = renderTableau(ligne, reste, Math.floor((fait / total) * 100), hh, mm, fin, cuve);
+    kpiDiv.innerHTML = renderTableau(ligne, reste, Math.floor((fait / cible) * 100), hh, mm, fin, cuve);
 
     const strategie = CALCUL_STRATEGIES[ligne] || itemsStandard;
     const items = strategie(ligne, cuve.qte, cuve.limite);
@@ -127,7 +136,11 @@ function majProgression(ligne, fait, total) {
 // Zone « Commande » repliée : son titre rappelle l'objectif pour ne pas avoir à l'ouvrir.
 function majResumeCommande(ligne, total) {
     const el = document.getElementById('commande-resume-' + ligne);
-    if (el) el.innerText = total > 0 ? fmt(total) + ' pièces' : 'à saisir';
+    if (!el) return;
+    const parBoite = LIGNES[ligne].tubesParBoite;
+    const cible = quantiteReelle(ligne, total);
+    el.innerHTML = total <= 0 ? 'à saisir'
+        : fmt(total) + ' pièces' + (parBoite ? `<small>${fmt(cible)} à faire · ${fmt(cible / parBoite)} boîtes de tubes entières</small>` : '');
 }
 
 function ouvrirCommande(ligne) {
@@ -288,7 +301,7 @@ const CALCUL_STRATEGIES = {
 
 function modifierPalette(ligne, direction) {
     const totalInput = document.getElementById('total-' + ligne);
-    let total = parseInt(totalInput.value) || 0;
+    let total = quantiteReelle(ligne, parseInt(totalInput.value) || 0);
 
     if (total <= 0 && direction === 1) {
         afficherAlerteTemporaire("⚠️ Veuillez d'abord saisir la quantité totale à produire");

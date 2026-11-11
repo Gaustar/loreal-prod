@@ -52,8 +52,10 @@ function acDuPoste() {
     return AC_L60[posteActuel] || [];
 }
 
+// Quantité réelle de la commande (boîtes de tubes entières), pas l'objectif
+// saisi : les étuis et notices doivent couvrir ce qui sera vraiment produit.
 function objectifEnCours(ligne) {
-    return parseInt(document.getElementById('total-' + ligne).value) || 0;
+    return quantiteReelle(ligne, parseInt(document.getElementById('total-' + ligne).value) || 0);
 }
 
 function majReintegration(ligne) {
